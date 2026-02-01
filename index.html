@@ -8,201 +8,376 @@
         :root {
             --theme-color: #ffffff; 
             --accent-color: #1d1d1f;
-            --hover-bg: rgba(0, 0, 0, 0.05);
+            --hover-bg: rgba(0, 0, 0, 0.04);
+            --shadow-soft: 0 4px 12px rgba(0,0,0,0.06); /* 요청하신 연한 그림자 */
         }
 
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: transparent; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; }
 
+        /* --- [1] 온보딩 창 (설정 화면) --- */
         .window {
-            width: 100%; max-width: 400px; background: #fff; border-radius: 22px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.1); overflow: hidden;
-            border: 0.5px solid rgba(0,0,0,0.1); display: flex; flex-direction: column;
+            width: 100%; max-width: 420px; background: #fff; border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12); overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column;
+            margin-bottom: 20px; z-index: 10;
         }
 
         .title-bar {
-            height: 54px; background: var(--theme-color);
-            display: flex; align-items: center; padding: 0 18px;
-            border-bottom: 0.5px solid rgba(0,0,0,0.05); transition: background 0.3s;
+            height: 50px; background: #fff; display: flex; align-items: center; padding: 0 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* 🎨 요청하신 커스텀 신호등 색상 적용 */
-        .dots { display: flex; gap: 8px; flex: 1; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.red { background: #e8bcbc; border: 0.5px solid rgba(0,0,0,0.05); }
-        .dot.yellow { background: #f4f4bd; border: 0.5px solid rgba(0,0,0,0.05); }
-        .dot.green { background: #c5e8c5; border: 0.5px solid rgba(0,0,0,0.05); }
-        
-        /* 위젯 모드 전환 시 신호등 스타일 */
-        .is-widget .dot { background: rgba(255,255,255,0.5); border: none; }
+        /* 쿡커 스타일 신호등 (온보딩 전용) */
+        .dots { display: flex; gap: 7px; flex: 1; }
+        .dot { width: 11px; height: 11px; border-radius: 50%; }
+        .dot.red { background: #e8bcbc; }
+        .dot.yellow { background: #f4f4bd; }
+        .dot.green { background: #c5e8c5; }
 
-        .bar-title { font-size: 13px; font-weight: 700; color: #1d1d1f; flex: 2; text-align: center; }
-
+        .bar-title { font-size: 13px; font-weight: 700; color: #333; flex: 2; text-align: center; }
         .nav-controls { flex: 1; display: flex; justify-content: flex-end; gap: 8px; }
-        .icon-btn {
-            background: none; border: none; cursor: pointer; padding: 5px;
-            display: flex; align-items: center; color: #1d1d1f; transition: 0.2s;
-        }
-        .icon-btn:disabled { opacity: 0.2; }
+        
+        .content { padding: 30px 25px; min-height: 320px; position: relative; }
+        .step { display: none; animation: fadeUp 0.3s ease; }
+        .step.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .content { padding: 35px 30px; min-height: 360px; }
-        .step { display: none; }
-        .step.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-        h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
-        p { font-size: 13px; color: #86868b; line-height: 1.5; margin-bottom: 25px; }
+        h1 { font-size: 20px; font-weight: 800; margin: 0 0 8px; color: #1d1d1f; }
+        p { font-size: 13px; color: #86868b; margin-bottom: 20px; line-height: 1.4; }
         
         input, select {
-            width: 100%; padding: 14px; border-radius: 12px;
-            border: 1px solid #efefef; background: #fbfbfd; outline: none;
-            font-size: 14px; margin-bottom: 12px;
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #eee;
+            background: #f9f9fc; outline: none; font-size: 13px; margin-bottom: 10px; transition: 0.2s;
+        }
+        input:focus { border-color: #d1d1d1; background: #fff; }
+
+        /* 색상 선택기 (사이즈 1/4로 축소) */
+        .color-palette { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+        .color-dot { 
+            width: 20px; height: 20px; border-radius: 50%; cursor: pointer; 
+            border: 2px solid #fff; box-shadow: 0 0 0 1px #ddd; transition: 0.2s; 
+        }
+        .color-dot:hover { transform: scale(1.1); }
+        .color-dot.active { box-shadow: 0 0 0 2px #333; transform: scale(1.1); }
+        
+        /* 커스텀 컬러 버튼 */
+        .custom-color-btn {
+            display: flex; align-items: center; gap: 6px; font-size: 12px; 
+            background: #f5f5f7; border: none; padding: 6px 12px; border-radius: 15px; 
+            cursor: pointer; color: #555; margin-top: 5px;
+        }
+        input[type="color"] { padding: 0; width: 20px; height: 20px; border: none; background: none; margin: 0; }
+
+        /* --- [2] 미리보기 & 실제 위젯 스타일 (Compact) --- */
+        #previewSection { 
+            display: none; flex-direction: column; align-items: center; gap: 10px; 
+            animation: fadeUp 0.5s ease; width: 100%;
+        }
+        .preview-label { font-size: 11px; font-weight: 600; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* 위젯 본체 (사이즈 축소, 연한 그림자) */
+        .widget-frame {
+            width: 320px; /* 컴팩트 사이즈 */
+            height: 380px; 
+            background: #fff; border-radius: 16px;
+            box-shadow: var(--shadow-soft); /* 연한 그림자 */
+            overflow: hidden; display: flex; flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
         }
 
-        .color-palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .color-dot { aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px #eee; }
-        .color-dot.active { box-shadow: 0 0 0 2px #1d1d1f; }
-
-        /* 위젯 검색 UI */
-        .search-box { padding: 15px; background: #f5f5f7; display: flex; gap: 8px; }
-        .input-wrap { flex: 1; background: #fff; border-radius: 12px; border: 1px solid #e5e5e7; display: flex; padding: 0 12px; }
-        .input-wrap input { border: none; background: none; margin: 0; flex: 1; }
+        .widget-top {
+            height: 44px; background: var(--theme-color); /* 테마색 적용 */
+            display: flex; align-items: center; padding: 0 12px; transition: background 0.3s;
+        }
         
-        .results { height: 380px; overflow-y: auto; padding: 10px; }
-        .book-item { display: flex; gap: 14px; padding: 12px; border-radius: 16px; cursor: pointer; transition: 0.2s; }
-        .book-item:hover { background: var(--hover-bg); }
+        /* 위젯 내부 요소 */
+        .widget-dots { display: flex; gap: 6px; flex: 1; }
+        .w-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.4); } /* 반투명 */
+        
+        .widget-title { font-size: 12px; font-weight: 600; color: #1d1d1f; flex: 2; text-align: center; opacity: 0.9; }
 
-        .cover { width: 54px; height: 78px; border-radius: 6px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .book-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-        .book-author { font-size: 12px; color: #86868b; }
+        .search-area { padding: 12px; background: #fafafa; }
+        .search-input-box {
+            background: #fff; border-radius: 8px; border: 1px solid #e5e5e5;
+            display: flex; align-items: center; padding: 0 10px; height: 36px;
+        }
+        .search-input-box input { border: none; background: none; margin: 0; font-size: 12px; width: 100%; padding: 0; }
+        
+        /* 빨간 동그라미: 돋보기 버튼 */
+        .search-btn { background: none; border: none; cursor: pointer; opacity: 0.6; padding: 4px; display: flex; }
+        .search-btn:hover { opacity: 1; }
+
+        .book-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .book-card { display: flex; gap: 10px; padding: 8px; border-radius: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 4px; }
+        .book-card:hover { background: var(--hover-bg); }
+        
+        .book-cover { width: 40px; height: 58px; border-radius: 4px; object-fit: cover; background: #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .book-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .b-title { font-size: 13px; font-weight: 600; color: #222; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .b-author { font-size: 11px; color: #888; }
+
+        /* 네비게이션 버튼 */
+        .nav-btn { background: none; border: none; cursor: pointer; color: #555; padding: 4px; }
+        .nav-btn:disabled { opacity: 0.2; }
 
         #toast {
-            position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%);
-            background: #1d1d1f; color: #fff; padding: 12px 24px;
-            border-radius: 30px; font-size: 13px; transition: 0.5s cubic-bezier(0.2, 1, 0.2, 1);
+            position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%);
+            background: #222; color: #fff; padding: 8px 20px; border-radius: 20px;
+            font-size: 12px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100;
         }
         #toast.show { bottom: 30px; }
+
+        /* 임베드 모드일 때 (iframe) */
+        body.is-embed .window { display: none; } /* 온보딩 숨김 */
+        body.is-embed #previewSection { display: flex; animation: none; }
     </style>
 </head>
 <body>
 
-<div class="window" id="app">
-    <div class="title-bar" id="bar">
-        <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
-        <div class="bar-title">Bookshelves Cooker</div>
-        <div class="nav-controls" id="nav">
-            <button class="icon-btn" id="prev" onclick="move(-1)" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
-            <button class="icon-btn" id="next" onclick="move(1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+    <div class="window" id="setupWindow">
+        <div class="title-bar">
+            <div class="dots">
+                <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+            </div>
+            <div class="bar-title">Bookshelves Cooker</div>
+            <div class="nav-controls">
+                <button class="nav-btn" id="prevBtn" onclick="moveStep(-1)" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button class="nav-btn" id="nextBtn" onclick="moveStep(1)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="step active" id="step1">
+                <h1>Connect Notion</h1>
+                <p>프라이빗 API 토큰을 입력하세요.</p>
+                <input type="password" id="tokenInput" placeholder="secret_..." oninput="updatePreview()">
+                <div style="margin-top: 5px;">
+                    <a href="https://www.notion.so/my-integrations" target="_blank" style="font-size:11px; color:#999; text-decoration:none; display:inline-flex; align-items:center; gap:3px;">
+                        내 인테그레이션 페이지 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="step" id="step2">
+                <h1>Select Library</h1>
+                <p>책을 저장할 데이터베이스를 선택하세요.</p>
+                <select id="dbSelect"></select>
+            </div>
+
+            <div class="step" id="step3">
+                <h1>Customize</h1>
+                <p>TTB 키와 위젯 디자인을 설정하세요.</p>
+                <input type="text" id="ttbInput" placeholder="알라딘 TTB 키 입력">
+                
+                <p style="margin-bottom:8px; font-weight:600; color:#333;">Theme Color</p>
+                <div class="color-palette" id="palette"></div>
+                
+                <label class="custom-color-btn">
+                    <input type="color" id="customColorPicker" value="#ffffff" onchange="applyCustomColor(this.value)">
+                    <span>Custom Color</span>
+                </label>
+            </div>
         </div>
     </div>
 
-    <div class="content" id="setup">
-        <div class="step active" id="s1">
-            <h1>Connect Notion</h1>
-            <p>프라이빗 통합 토큰을 입력하여<br>아카이빙 페이지와 연동하세요.</p>
-            <input type="password" id="tk" placeholder="secret_...">
-            <div style="margin-top: 8px;">
-                <a href="https://www.notion.so/my-integrations" target="_blank" 
-                   style="font-size: 12px; color: #86868b; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                    내 인테그레이션 바로가기
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-                </a>
+    <div id="previewSection">
+        <div class="preview-label" id="previewLabel">Live Preview</div>
+        
+        <div class="widget-frame">
+            <div class="widget-top">
+                <div class="widget-dots">
+                    <div class="w-dot"></div><div class="w-dot"></div><div class="w-dot"></div>
+                </div>
+                <div class="widget-title">Bookshelves</div> 
+                <div style="flex:1;"></div>
             </div>
-        </div>
-        <div class="step" id="s2">
-            <h1>Select Library</h1>
-            <p>책을 저장할 데이터베이스를 선택하세요.</p>
-            <select id="db"></select>
-        </div>
-        <div class="step" id="s3">
-            <h1>Design & API</h1>
-            <p>알라딘 TTB 키와 포인트 색상을 고르세요.</p>
-            <input type="text" id="ttb" placeholder="ttb key...">
-            <div class="color-palette" id="palette"></div>
+            
+            <div class="search-area">
+                <div class="search-input-box">
+                    <input type="text" id="searchInput" placeholder="Search books..." onkeypress="handleEnter(event)">
+                    <button class="search-btn" onclick="performSearch()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="book-list" id="resultList">
+                <div class="book-card" onclick="alert('위젯이 생성되면 실제 저장이 가능해요!')">
+                    <div class="book-cover" style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:10px;">Example</div>
+                    <div class="book-info">
+                        <div class="b-title">미리보기 도서</div>
+                        <div class="b-author">작가 이름</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="widget" style="display:none;">
-        <div class="search-box">
-            <div class="input-wrap">
-                <input type="text" id="q" placeholder="도서 제목 검색..." onkeypress="if(event.key==='Enter')search()">
-                <button class="icon-btn" onclick="search()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
-            </div>
-        </div>
-        <div class="results" id="res"></div>
-    </div>
-</div>
-<div id="toast">Saved! 🤍</div>
+    <div id="toast">Saved! 🤍</div>
 
 <script>
-    const SERVER = "https://bookshelves-server.onrender.com";
-    let step = 1, selColor = "";
-    const themes = ["f7cbd6", "fcd4b8", "fceeb8", "b4e4b4", "a4c4e4", "c8b4c8", "cccccc", "1d1d1f"];
+    const SERVER_URL = "https://bookshelves-server.onrender.com"; // 본인 서버 주소 확인
+    const themes = ["e8bcbc", "f4f4bd", "c5e8c5", "a4c4e4", "e0e0e0", "ffffff"];
+    let step = 1;
+    let selectedColor = "ffffff";
 
+    // 1. 초기 실행: URL 파라미터 확인 (위젯 모드 vs 온보딩 모드)
     const params = new URLSearchParams(window.location.search);
     if (params.get('t')) {
-        document.getElementById('setup').style.display = 'none';
-        document.getElementById('nav').style.display = 'none';
-        document.getElementById('widget').style.display = 'block';
-        document.getElementById('app').classList.add('is-widget');
-        const c = params.get('c');
-        if(c) {
-            document.documentElement.style.setProperty('--theme-color', '#' + c);
-            const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16);
-            document.documentElement.style.setProperty('--hover-bg', `rgba(${r},${g},${b},0.15)`);
-        }
+        // 위젯 모드 진입
+        document.body.classList.add('is-embed');
+        initWidgetMode();
     } else {
-        const pal = document.getElementById('palette');
-        themes.forEach(t => {
+        // 온보딩 모드 진입
+        initOnboarding();
+    }
+
+    // --- [온보딩 로직] ---
+    function initOnboarding() {
+        document.getElementById('previewSection').style.display = 'flex'; // 미리보기 켜기
+        
+        // 팔레트 생성
+        const p = document.getElementById('palette');
+        themes.forEach(c => {
             const d = document.createElement('div');
-            d.className = 'color-dot'; d.style.background = '#' + t;
-            d.onclick = () => {
-                selColor = t;
-                document.querySelectorAll('.color-dot').forEach(el => el.classList.remove('active'));
-                d.classList.add('active');
-            };
-            pal.appendChild(d);
+            d.className = 'color-dot';
+            d.style.backgroundColor = '#' + c;
+            d.onclick = () => applyColor(c, d);
+            p.appendChild(d);
         });
     }
 
-    async function move(n) {
+    function applyColor(hex, element) {
+        selectedColor = hex;
+        // 팔레트 UI 업데이트
+        if (element) {
+            document.querySelectorAll('.color-dot').forEach(e => e.classList.remove('active'));
+            element.classList.add('active');
+        }
+        // 미리보기 위젯 업데이트 (실시간 반영)
+        document.documentElement.style.setProperty('--theme-color', '#' + hex);
+        document.getElementById('customColorPicker').value = '#' + hex;
+    }
+
+    function applyCustomColor(hexWithHash) {
+        const hex = hexWithHash.replace('#', '');
+        applyColor(hex, null);
+    }
+
+    async function moveStep(n) {
         if (n === 1 && step === 1) {
-            const r = await fetch(`${SERVER}/api/notion/databases`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ token: document.getElementById('tk').value })
-            });
-            const dbs = await r.json();
-            document.getElementById('db').innerHTML = dbs.map(d => `<option value="${d.id}">${d.title}</option>`).join('');
+            const t = document.getElementById('tokenInput').value;
+            if(!t) return alert("토큰을 입력해주세요.");
+            
+            // DB 가져오기
+            try {
+                const res = await fetch(`${SERVER_URL}/api/notion/databases`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ token: t })
+                });
+                const dbs = await res.json();
+                if(dbs.error) throw new Error(dbs.error);
+                document.getElementById('dbSelect').innerHTML = dbs.map(d => `<option value="${d.id}">${d.title}</option>`).join('');
+            } catch(e) {
+                return alert("노션 연결 실패: " + e.message);
+            }
         }
+
         if (step + n === 4) {
-            const url = `${window.location.origin}${window.location.pathname}?t=${btoa(document.getElementById('tk').value)}&d=${btoa(document.getElementById('db').value)}&k=${btoa(document.getElementById('ttb').value)}&c=${selColor}`;
+            // 완료 및 URL 생성
+            const t = btoa(document.getElementById('tokenInput').value);
+            const d = btoa(document.getElementById('dbSelect').value);
+            const k = btoa(document.getElementById('ttbInput').value);
+            const url = `${window.location.origin}${window.location.pathname}?t=${t}&d=${d}&k=${k}&c=${selectedColor}`;
             navigator.clipboard.writeText(url);
-            return alert("URL 복사 완료! 노션에 붙여넣으세요.");
+            alert("위젯 URL이 복사되었습니다! 노션에 붙여넣으세요.");
+            return;
         }
-        document.getElementById('s'+step).classList.remove('active');
+
+        document.getElementById(`step${step}`).classList.remove('active');
         step += n;
-        document.getElementById('s'+step).classList.add('active');
-        document.getElementById('prev').disabled = (step === 1);
+        document.getElementById(`step${step}`).classList.add('active');
+        document.getElementById('prevBtn').disabled = (step === 1);
+        
+        // 마지막 단계에서 미리보기를 더 강조하거나 버튼 아이콘 변경
+        const nextBtn = document.getElementById('nextBtn');
+        if(step === 3) nextBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>`; // 체크 아이콘
+        else nextBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`;
     }
 
-    async function search() {
-        const res = await fetch(`${SERVER}/api/search?k=${atob(params.get('k'))}&q=${encodeURIComponent(document.getElementById('q').value)}`);
-        const books = await res.json();
-        document.getElementById('res').innerHTML = books.map(b => `
-            <div class="book-item" onclick="save('${b.title}', '${b.author}', '${b.cover}')">
-                <img src="${b.cover}" class="cover">
-                <div><div class="book-title">${b.title}</div><div class="book-author">${b.author}</div></div>
-            </div>
-        `).join('');
+    // --- [위젯 모드 로직] ---
+    function initWidgetMode() {
+        document.getElementById('previewLabel').style.display = 'none'; // 'Live Preview' 텍스트 숨김
+        document.getElementById('resultList').innerHTML = ''; // 예시 데이터 삭제
+        
+        // 테마색 적용
+        const c = params.get('c');
+        if(c) document.documentElement.style.setProperty('--theme-color', '#' + c);
     }
 
-    async function save(title, author, cover) {
-        await fetch(`${SERVER}/api/notion/save`, {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ token: atob(params.get('t')), db: atob(params.get('d')), title, author, cover })
-        });
-        const t = document.getElementById('toast');
-        t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000);
+    // 엔터키 처리 함수 (요청하신 빨간 동그라미 기능)
+    function handleEnter(e) {
+        if (e.key === 'Enter') performSearch();
+    }
+
+    async function performSearch() {
+        const query = document.getElementById('searchInput').value;
+        if (!query) return;
+
+        // 온보딩 중이면 검색 흉내만 내기
+        if (!document.body.classList.contains('is-embed')) {
+            alert('이곳은 미리보기입니다. 실제 검색은 위젯 생성 후 가능해요!');
+            return;
+        }
+
+        const list = document.getElementById('resultList');
+        list.innerHTML = '<div style="text-align:center; padding:20px; color:#999; font-size:12px;">Searching...</div>';
+        
+        try {
+            const k = atob(params.get('k'));
+            const res = await fetch(`${SERVER_URL}/api/search?k=${k}&q=${encodeURIComponent(query)}`);
+            const books = await res.json();
+            
+            if(books.error) throw new Error(books.error);
+
+            list.innerHTML = books.map(b => `
+                <div class="book-card" onclick="saveToNotion('${b.title}', '${b.author}', '${b.cover}')">
+                    <img src="${b.cover}" class="book-cover">
+                    <div class="book-info">
+                        <div class="b-title">${b.title}</div>
+                        <div class="b-author">${b.author}</div>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            list.innerHTML = `<div style="text-align:center; padding:20px; color:red; font-size:11px;">Error: ${e.message}</div>`;
+        }
+    }
+
+    async function saveToNotion(title, author, cover) {
+        const toast = document.getElementById('toast');
+        
+        try {
+            await fetch(`${SERVER_URL}/api/notion/save`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    token: atob(params.get('t')),
+                    db: atob(params.get('d')),
+                    title, author, cover
+                })
+            });
+            
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        } catch (e) {
+            alert("저장 실패: " + e.message);
+        }
     }
 </script>
 </body>
