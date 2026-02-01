@@ -222,27 +222,34 @@
         document.getElementById('prevBtn').disabled = (step === 1);
     }
 
+    // 수정된 부분: 검색 결과에서 도서 데이터를 객체로 안전하게 전달
     async function performSearch() {
         const query = document.getElementById('searchInput').value;
         const res = await fetch(`${SERVER_URL}/api/search?k=${atob(params.get('k'))}&q=${encodeURIComponent(query)}`);
         const books = await res.json();
-        document.getElementById('resultList').innerHTML = books.map(b => `
-            <div class="book-card" onclick="saveToNotion('${b.title.replace(/'/g, "\\'")}', '${b.author.replace(/'/g, "\\'")}', '${b.cover}', '${b.description.replace(/'/g, "\\'").replace(/\n/g, " ")}')">
+        document.getElementById('resultList').innerHTML = books.map(b => {
+            const safeData = encodeURIComponent(JSON.stringify(b));
+            return `
+            <div class="book-card" onclick="saveToNotion('${safeData}')">
                 <img src="${b.cover}" class="book-cover" onerror="this.src='https://via.placeholder.com/150x200?text=No+Image'">
                 <div class="book-info"><div class="b-title">${b.title}</div><div class="b-author">${b.author}</div></div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
-    async function saveToNotion(title, author, cover, description) {
+    // 수정된 부분: 전달받은 도서 데이터를 풀어서 서버로 전송 (toc 포함)
+    async function saveToNotion(encodedData) {
+        const book = JSON.parse(decodeURIComponent(encodedData));
         await fetch(`${SERVER_URL}/api/notion/save`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ token: atob(params.get('t')), db: atob(params.get('d')), title, author, cover, description })
+            body: JSON.stringify({ 
+                token: atob(params.get('t')), 
+                db: atob(params.get('d')), 
+                ...book // 제목, 저자, 커버, 설명, 출판사, 장르, 목차를 한꺼번에 전달
+            })
         });
         const t = document.getElementById('toast');
         t.classList.add('show'); 
         setTimeout(() => { t.classList.remove('show'); goHome(); }, 2000);
     }
 </script>
-</body>
-</html>
