@@ -10,7 +10,9 @@
             --mac-card: #ffffff;
             --accent: #007aff;
             --gray-text: #86868b;
-            --border: rgba(0,0,0,0.1);
+            --dot-red: #f3aeaf;
+            --dot-yellow: #f7e3af;
+            --dot-green: #b1d9b7;
         }
 
         body {
@@ -26,35 +28,35 @@
             border: 1px solid rgba(0,0,0,0.05); position: relative;
         }
 
-        /* 1. 상단바 디자인 수정 (Bookshelves 텍스트 & 흑백 화살표) */
+        /* [상단바] 사진과 100% 동일한 배치 및 컬러 */
         .title-bar {
-            height: 48px; background: #fdfdfd; display: flex; align-items: center;
+            height: 48px; background: #ffffff; display: flex; align-items: center;
             padding: 0 20px; border-bottom: 0.5px solid #efefef;
         }
-        .dots { display: flex; gap: 8px; width: 60px; }
+        .dots { display: flex; gap: 8px; width: 80px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.red { background: #ff5f57; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #28c940; }
+        .dot.red { background: var(--dot-red); } 
+        .dot.yellow { background: var(--dot-yellow); } 
+        .dot.green { background: var(--dot-green); }
         
-        .bar-title { flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: #1d1d1f; }
+        .bar-title { flex: 1; text-align: center; font-size: 14px; font-weight: 600; color: #1d1d1f; }
 
-        .nav-controls { display: flex; gap: 15px; width: 60px; justify-content: flex-end; }
+        .nav-controls { display: flex; gap: 15px; width: 80px; justify-content: flex-end; align-items: center; }
         .nav-btn {
             background: none; border: none; font-size: 18px; cursor: pointer;
             color: #d2d2d7; transition: color 0.2s; padding: 0; line-height: 1;
         }
-        .nav-btn.active { color: #1d1d1f; } /* 화살표 흑백 변경 */
-        .check-icon { font-size: 16px; font-weight: bold; display: none; }
+        .nav-btn.active { color: #1d1d1f; } /* 화살표 흑백 */
+        .check-icon { font-size: 20px; color: #1d1d1f; text-decoration: none; display: none; }
 
         /* 컨텐츠 영역 */
-        .step-container { padding: 45px; min-height: 300px; display: none; }
+        .step-container { padding: 45px; min-height: 350px; display: none; }
         .step-container.active { display: block; animation: fadeIn 0.4s ease; }
 
         h1 { font-size: 24px; font-weight: 700; margin: 0 0 12px 0; letter-spacing: -0.8px; }
         p.desc { font-size: 14px; color: var(--gray-text); margin-bottom: 32px; line-height: 1.5; }
+        .sub-desc { font-size: 13px; color: #d2d2d7; margin-bottom: 20px; margin-top: -25px; }
         
-        .link-sub { font-size: 12px; color: var(--gray-text); margin-top: 8px; text-decoration: none; display: inline-block; }
-        .link-sub:hover { text-decoration: underline; color: var(--accent); }
-
         .input-group { margin-bottom: 24px; }
         label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-text); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select {
@@ -62,6 +64,21 @@
             background: #fbfbfd; font-size: 15px; outline: none; box-sizing: border-box; transition: 0.2s;
         }
         input:focus { border-color: #1d1d1f; background: #fff; }
+
+        /* [Step 4] 디자인 커스텀 스타일 */
+        .color-palette { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
+        .color-item { text-align: center; width: 45px; cursor: pointer; }
+        .color-circle { 
+            width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 8px; 
+            border: 2px solid transparent; position: relative; transition: 0.2s;
+        }
+        .color-circle.selected { border-color: #1d1d1f; }
+        .color-circle.selected::after { content: '✓'; color: #fff; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; }
+        .color-name { font-size: 11px; color: var(--gray-text); }
+
+        .custom-slider { margin-bottom: 25px; background: #f5f5f7; padding: 20px; border-radius: 15px; }
+        .slider-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 10px; font-weight: 600; }
+        input[type="color"] { border: none; padding: 0; width: 100%; height: 40px; border-radius: 10px; cursor: pointer; background: none; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -87,13 +104,13 @@
         <div class="input-group">
             <label>Internal Integration Token</label>
             <input type="password" id="notion-token" placeholder="secret_xxxxxxx">
-            <a href="https://www.notion.so/profile/integrations" target="_blank" class="link-sub">내 인티그레이션 바로가기 ↗</a>
+            <a href="https://www.notion.so/profile/integrations" target="_blank" style="font-size:12px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">내 인티그레이션 바로가기 ↗</a>
         </div>
     </div>
 
     <div class="step-container" id="step2">
         <h1>Select Library</h1>
-        <p class="desc" style="color:#d2d2d7; font-size: 13px; margin-top: -8px; margin-bottom: 20px;">Select your Database.</p>
+        <p class="sub-desc">Select your Database.</p>
         <p class="desc">도서를 저장할 데이터베이스(BOOK DB)를 목록에서 선택해주세요.</p>
         <div class="input-group">
             <label>Available Databases</label>
@@ -103,7 +120,7 @@
 
     <div class="step-container" id="step3">
         <h1>Personalize</h1>
-        <p class="desc">Insert your personal TTB key.</p>
+        <p class="sub-desc">Insert your personal TTB key.</p>
         <div class="input-group">
             <label>Aladin TTB Key</label>
             <input type="text" id="ttb-key" placeholder="ttbxxxxxxx">
@@ -112,23 +129,37 @@
 
     <div class="step-container" id="step4">
         <h1>Widget Design</h1>
-        <p class="desc">위젯의 세부 디자인을 설정합니다.</p>
+        <p class="desc">위젯의 컬러와 테마를 커스터마이징 하세요.</p>
+        
+        <label>COLOR SAMPLES</label>
+        <div class="color-palette">
+            <div class="color-item" onclick="pickColor('#f7cbd6')"><div class="color-circle selected" style="background:#f7cbd6;"></div><div class="color-name">Pink</div></div>
+            <div class="color-item" onclick="pickColor('#f9d5bb')"><div class="color-circle" style="background:#f9d5bb;"></div><div class="color-name">Coral</div></div>
+            <div class="color-item" onclick="pickColor('#ffffff')"><div class="color-circle" style="background:#ffffff; border:1px solid #eee;"></div><div class="color-name">White</div></div>
+            <div class="color-item" onclick="pickColor('#f6e8b1')"><div class="color-circle" style="background:#f6e8b1;"></div><div class="color-name">Yellow</div></div>
+            <div class="color-item" onclick="pickColor('#b4e4c0')"><div class="color-circle" style="background:#b4e4c0;"></div><div class="color-name">Green</div></div>
+            <div class="color-item" onclick="pickColor('#aac4f2')"><div class="color-circle" style="background:#aac4f2;"></div><div class="color-name">Blue</div></div>
         </div>
+
+        <div class="custom-slider">
+            <div class="slider-header"><span>Primary Color</span><span id="hex-val">#F7CBD6</span></div>
+            <input type="color" id="primary-picker" value="#f7cbd6" oninput="updateColor(this.value)">
+        </div>
+    </div>
 </div>
 
 <script>
     const SERVER_URL = "https://bookshelves-server.onrender.com";
     let currentStep = 1;
+    let selectedColor = "#f7cbd6";
 
     async function moveStep(step) {
         const next = currentStep + step;
         if (step === 1) {
-            if (currentStep === 1) {
-                const token = document.getElementById('notion-token').value;
-                if (!token) return alert('토큰을 입력해주세요!');
-                await loadDatabases(token);
-            }
+            if (currentStep === 1 && !document.getElementById('notion-token').value) return alert('토큰을 입력해주세요!');
+            if (currentStep === 1) await loadDatabases(document.getElementById('notion-token').value);
             if (currentStep === 2 && !document.getElementById('db-select').value) return alert('DB를 선택해주세요!');
+            if (currentStep === 3 && !document.getElementById('ttb-key').value) return alert('TTB 키를 입력해주세요!');
         }
 
         if (next >= 1 && next <= 4) {
@@ -143,7 +174,6 @@
         document.getElementById('prevBtn').classList.toggle('active', currentStep > 1);
         document.getElementById('nextBtn').style.display = currentStep === 4 ? 'none' : 'block';
         document.getElementById('finishBtn').style.display = currentStep === 4 ? 'block' : 'none';
-        document.getElementById('finishBtn').classList.add('active');
     }
 
     async function loadDatabases(token) {
@@ -156,13 +186,31 @@
             });
             const dbs = await res.json();
             select.innerHTML = dbs.map(db => `<option value="${db.id}">${db.title}</option>`).join('');
-        } catch (e) {
-            alert('연결 실패! 토큰과 페이지 연동을 확인해주세요.');
-            moveStep(-1);
-        }
+        } catch (e) { alert('연결 실패!'); moveStep(-1); }
+    }
+
+    function pickColor(color) {
+        selectedColor = color;
+        document.querySelectorAll('.color-circle').forEach(el => el.classList.remove('selected'));
+        event.currentTarget.querySelector('.color-circle').classList.add('selected');
+        document.getElementById('primary-picker').value = color;
+        document.getElementById('hex-val').innerText = color.toUpperCase();
+    }
+
+    function updateColor(color) {
+        selectedColor = color;
+        document.getElementById('hex-val').innerText = color.toUpperCase();
+        document.querySelectorAll('.color-circle').forEach(el => el.classList.remove('selected'));
     }
 
     function finish() {
+        const t = btoa(document.getElementById('notion-token').value);
+        const d = btoa(document.getElementById('db-select').value);
+        const k = btoa(document.getElementById('ttb-key').value);
+        const bg = selectedColor.replace('#', '');
+        const finalUrl = `${SERVER_URL}/widget?t=${t}&d=${d}&k=${k}&bg=${bg}`;
+        
+        navigator.clipboard.writeText(finalUrl);
         alert('복사 완료! 노션에서 /embed 해주세요. 🤍');
     }
 </script>
