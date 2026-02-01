@@ -214,7 +214,7 @@
             const d = btoa(document.getElementById('dbSelect').value);
             const k = btoa(document.getElementById('ttbInput').value);
             const url = `${window.location.origin}${window.location.pathname}?t=${t}&d=${d}&k=${k}&c=${selectedColor}`;
-            navigator.clipboard.writeText(url); alert("위젯이 생성되었습니다. 노션에 /embed 후 붙여넣어보세요. 🤍"); return;
+            navigator.clipboard.writeText(url); alert("위젯 생성 성공! 노션에 붙여넣으세요. 🤍"); return;
         }
         document.getElementById(`step${step}`).classList.remove('active');
         step += n;
@@ -222,12 +222,12 @@
         document.getElementById('prevBtn').disabled = (step === 1);
     }
 
-    // 수정된 부분: 검색 결과에서 도서 데이터를 객체로 안전하게 전달
     async function performSearch() {
         const query = document.getElementById('searchInput').value;
         const res = await fetch(`${SERVER_URL}/api/search?k=${atob(params.get('k'))}&q=${encodeURIComponent(query)}`);
         const books = await res.json();
         document.getElementById('resultList').innerHTML = books.map(b => {
+            // 아카이빙 실패 방지를 위한 데이터 인코딩
             const safeData = encodeURIComponent(JSON.stringify(b));
             return `
             <div class="book-card" onclick="saveToNotion('${safeData}')">
@@ -237,19 +237,23 @@
         `}).join('');
     }
 
-    // 수정된 부분: 전달받은 도서 데이터를 풀어서 서버로 전송 (toc 포함)
     async function saveToNotion(encodedData) {
         const book = JSON.parse(decodeURIComponent(encodedData));
-        await fetch(`${SERVER_URL}/api/notion/save`, {
+        const res = await fetch(`${SERVER_URL}/api/notion/save`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ 
                 token: atob(params.get('t')), 
                 db: atob(params.get('d')), 
-                ...book // 제목, 저자, 커버, 설명, 출판사, 장르, 목차를 한꺼번에 전달
+                ...book 
             })
         });
-        const t = document.getElementById('toast');
-        t.classList.add('show'); 
-        setTimeout(() => { t.classList.remove('show'); goHome(); }, 2000);
+        const data = await res.json();
+        if(data.success) {
+            const t = document.getElementById('toast');
+            t.classList.add('show'); 
+            setTimeout(() => { t.classList.remove('show'); goHome(); }, 2000);
+        } else {
+            alert("저장 실패: " + data.error);
+        }
     }
 </script>
