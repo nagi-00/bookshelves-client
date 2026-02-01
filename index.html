@@ -16,6 +16,7 @@
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; letter-spacing: -0.01em; }
         body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; padding: 20px; }
 
+        /* --- [1] 온보딩 창 (사용자 수정 텍스트 반영) --- */
         .window {
             width: 100%; max-width: 420px; background: #fff; border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;
@@ -39,6 +40,7 @@
         .color-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px #ddd; }
         .color-dot.active { box-shadow: 0 0 0 2px #333; }
 
+        /* --- [2] 위젯 디자인 (크기 및 중앙정렬 최적화) --- */
         .widget-frame {
             width: 240px; 
             min-height: 175px; 
@@ -47,6 +49,7 @@
             box-shadow: var(--shadow-pale); overflow: hidden; display: flex; flex-direction: column;
             border: 1px solid rgba(0,0,0,0.05); margin: 0 auto;
         }
+        /* 미리보기에서는 자동 높이, 임베드에서는 꽉 차게 */
         body:not(.is-embed) .widget-frame { height: auto; }
         body.is-embed .widget-frame { height: 100vh; }
 
@@ -76,9 +79,10 @@
             background: #fff; border-radius: 6px; border: 1px solid #e5e5e7;
             display: flex; align-items: center; padding: 0 8px; height: 26px;
         }
+        /* 검색창 텍스트 정밀 중앙 정렬 */
         .search-box input { 
             border: none; background: none; font-size: 10px; width: 100%; outline: none; 
-            height: 100%; line-height: 26px; padding: 0 4px; display: flex; align-items: center;
+            height: 100%; line-height: normal; padding: 0 4px; display: flex; align-items: center;
         }
 
         .book-list { flex: 1; overflow-y: auto; padding: 4px; }
@@ -137,7 +141,7 @@
         <div id="widgetSearch">
             <div class="search-area">
                 <div class="search-box">
-                    <button class="icon-btn" onclick="goHome()" style="background:none;border:none;margin-right:4px;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                    <button class="icon-btn" onclick="goHome()" style="background:none;border:none;margin-right:4px;cursor:pointer;color:#aaa;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
                     <input type="text" id="searchInput" placeholder="Search books..." onkeypress="if(event.key==='Enter')performSearch()">
                 </div>
             </div>
