@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookshelves | 나만의 서재 위젯 만들기</title>
+    <style>
+        :root {
+            --mac-bg: #f5f5f7;
+            --mac-card: #ffffff;
+            --mac-accent: #007aff;
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            /* 위젯 기본 설정값 */
+            --w-bg: #ffffff;
+            --w-bar: #fbfbfd;
+            --w-text: #1d1d1f;
+        }
+
+        body {
+            margin: 0; background-color: var(--mac-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            color: var(--text-main); -webkit-font-smoothing: antialiased;
+        }
+
+        /* macOS Window 스타일 */
+        .window {
+            width: 420px; background: var(--mac-card); border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1); overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05); position: relative;
+        }
+
+        /* 상단바 */
+        .title-bar {
+            height: 44px; background: #fdfdfd; display: flex; align-items: center;
+            padding: 0 16px; border-bottom: 0.5px solid #e5e5e5;
+        }
+
+        .dots { display: flex; gap: 8px; flex: 1; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        /* 신호등 컬러 커스터마이징 반영 가능 */
+        .dot.red { background: #ff5f57; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #28c940; }
+
+        .nav-controls { display: flex; gap: 20px; }
+        .nav-btn {
+            background: none; border: none; font-size: 20px; cursor: pointer;
+            color: #d2d2d7; transition: color 0.2s; padding: 0;
+        }
+        .nav-btn.active { color: var(--mac-accent); }
+
+        /* 컨텐츠 영역 */
+        .step-container { padding: 40px; min-height: 320px; display: none; }
+        .step-container.active { display: block; animation: fadeIn 0.4s ease; }
+
+        h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+        p.desc { font-size: 14px; color: var(--text-sub); margin-bottom: 30px; line-height: 1.4; }
+
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; margin-left: 2px; }
+        input, select {
+            width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #d2d2d7;
+            background: #fbfbfd; font-size: 15px; outline: none; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--mac-accent); box-shadow: 0 0 0 4px rgba(0,122,255,0.1); }
+
+        /* 디자인 커스텀 (샘플 컬러) */
+        .color-grid { display: flex; gap: 10px; margin-top: 5px; }
+        .color-chip {
+            width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+            border: 2px solid transparent; transition: transform 0.2s;
+        }
+        .color-chip:hover { transform: scale(1.1); }
+        .color-chip.selected { border-color: var(--mac-accent); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="window">
+    <div class="title-bar">
+        <div class="dots">
+            <div class="dot red" id="dot-red-preview"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+        </div>
+        <div class="nav-controls">
+            <button class="nav-btn" id="prevBtn" onclick="moveStep(-1)">←</button>
+            <button class="nav-btn active" id="nextBtn" onclick="moveStep(1)">→</button>
+        </div>
+    </div>
+
+    <div class="step-container active" id="step1">
+        <h1>Connect Notion</h1>
+        <p class="desc">Bookshelves의 시작입니다.<br>노션 API 토큰을 입력해주세요.</p>
+        <div class="input-group">
+            <label>Internal Integration Token</label>
+            <input type="password" id="notion-token" placeholder="secret_xxxxxxx">
+        </div>
+    </div>
+
+    <div class="step-container" id="step2">
+        <h1>Select Library</h1>
+        <p class="desc">도서를 저장할 데이터베이스(BOOK DB)를<br>목록에서 선택해주세요.</p>
+        <div class="input-group">
+            <label>Available Databases</label>
+            <select id="db-select">
+                <option value="">데이터베이스를 불러오는 중...</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="step-container" id="step3">
+        <h1>Personalize</h1>
+        <p class="desc">위젯의 디자인과 TTB 키를 설정합니다.</p>
+        <div class="input-group">
+            <label>Aladin TTB Key</label>
+            <input type="text" id="ttb-key" placeholder="ttbxxxxxxx">
+        </div>
+        <div class="input-group">
+            <label>Widget Background</label>
+            <div class="color-grid">
+                <div class="color-chip selected" style="background:#ffffff;" onclick="pickColor('bg', '#ffffff', this)"></div>
+                <div class="color-chip" style="background:#ffb7c5;" onclick="pickColor('bg', '#ffb7c5', this)"></div> <div class="color-chip" style="background:#a7c4bc;" onclick="pickColor('bg', '#a7c4bc', this)"></div> <div class="color-chip" style="background:#a0c4ff;" onclick="pickColor('bg', '#a0c4ff', this)"></div> </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SERVER_URL = "https://bookshelves-server.onrender.com";
+    let currentStep = 1;
+    let config = { bg: '#ffffff', bar: '#fbfbfd', text: '#1d1d1f', dotRed: '#ff5f57' };
+
+    async function moveStep(step) {
+        const next = currentStep + step;
+        
+        if (step === 1) { // 다음으로 갈 때 체크
+            if (currentStep === 1) {
+                const token = document.getElementById('notion-token').value;
+                if (!token) return alert('토큰을 입력해주세요!');
+                await loadDatabases(token);
+            } else if (currentStep === 2) {
+                if (!document.getElementById('db-select').value) return alert('데이터베이스를 선택해주세요!');
+            } else if (currentStep === 3) {
+                finishOnboarding();
+                return;
+            }
+        }
+
+        if (next >= 1 && next <= 3) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${next}`).classList.add('active');
+            currentStep = next;
+            updateNav();
+        }
+    }
+
+    function updateNav() {
+        document.getElementById('prevBtn').classList.toggle('active', currentStep > 1);
+        document.getElementById('nextBtn').innerText = currentStep === 3 ? '✓' : '→';
+    }
+
+    async function loadDatabases(token) {
+        try {
+            const res = await fetch(`${SERVER_URL}/api/notion/databases`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token })
+            });
+            const dbs = await res.json();
+            const select = document.getElementById('db-select');
+            select.innerHTML = dbs.map(db => `<option value="${db.id}">${db.title}</option>`).join('');
+        } catch (e) {
+            alert('DB 목록을 불러오지 못했습니다. 연결을 확인해주세요.');
+            moveStep(-1);
+        }
+    }
+
+    function pickColor(type, color, el) {
+        config[type] = color;
+        // 선택 표시 업데이트
+        el.parentElement.querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        // 신호등 색상 커스텀 예시 (원하실 경우 추가 확장)
+        if(type === 'dotRed') document.getElementById('dot-red-preview').style.background = color;
+    }
+
+    function finishOnboarding() {
+        const params = new URLSearchParams({
+            t: btoa(document.getElementById('notion-token').value),
+            d: btoa(document.getElementById('db-select').value),
+            k: btoa(document.getElementById('ttb-key').value),
+            bg: config.bg
+        });
+        
+        const finalUrl = `${SERVER_URL}/widget?${params.toString()}`;
+        navigator.clipboard.writeText(finalUrl);
+        alert('복사 완료! 노션에서 /embed 해주세요. 🤍');
+    }
+</script>
+</body>
+</html>
