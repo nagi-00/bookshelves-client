@@ -20,21 +20,20 @@
             border: 0.5px solid rgba(0,0,0,0.1); display: flex; flex-direction: column;
         }
 
-        /* 상단바 */
         .title-bar {
             height: 54px; background: var(--theme-color);
             display: flex; align-items: center; padding: 0 18px;
             border-bottom: 0.5px solid rgba(0,0,0,0.05); transition: background 0.3s;
         }
 
-        /* 뽀모도로 스타일 유색 신호등 */
+        /* 🎨 요청하신 커스텀 신호등 색상 적용 */
         .dots { display: flex; gap: 8px; flex: 1; }
         .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.red { background: #e8bcbc; border: 0.5px solid #e8bcbc; }
-        .dot.yellow { background: #f4f4bd; border: 0.5px solid #f4f4bd; }
-        .dot.green { background: #c5e8c5; border: 0.5px solid #c5e8c5; }
+        .dot.red { background: #e8bcbc; border: 0.5px solid rgba(0,0,0,0.05); }
+        .dot.yellow { background: #f4f4bd; border: 0.5px solid rgba(0,0,0,0.05); }
+        .dot.green { background: #c5e8c5; border: 0.5px solid rgba(0,0,0,0.05); }
         
-        /* 위젯 모드에서 테마색이 진할 경우 신호등을 반투명 흰색으로 */
+        /* 위젯 모드 전환 시 신호등 스타일 */
         .is-widget .dot { background: rgba(255,255,255,0.5); border: none; }
 
         .bar-title { font-size: 13px; font-weight: 700; color: #1d1d1f; flex: 2; text-align: center; }
@@ -102,6 +101,13 @@
             <h1>Connect Notion</h1>
             <p>프라이빗 통합 토큰을 입력하여<br>아카이빙 페이지와 연동하세요.</p>
             <input type="password" id="tk" placeholder="secret_...">
+            <div style="margin-top: 8px;">
+                <a href="https://www.notion.so/my-integrations" target="_blank" 
+                   style="font-size: 12px; color: #86868b; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                    내 인테그레이션 바로가기
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </a>
+            </div>
         </div>
         <div class="step" id="s2">
             <h1>Select Library</h1>
