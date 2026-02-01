@@ -3,151 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookshelves | Connect</title>
+    <title>Bookshelves | Search</title>
     <style>
-        :root { --gray: #86868b; --dot-r: #f3aeaf; --dot-y: #f7e3af; --dot-g: #b1d9b7; }
+        :root {
+            /* 사용자가 선택한 테마 색상 (예시: 핑크) */
+            --theme-color: #f7cbd6;
+            --theme-color-light: rgba(247, 203, 214, 0.15);
+            --gray-bg: #f5f5f7;
+            --text-main: #333333;
+            --text-sub: #86868b;
+            --icon-gray: #999999;
+        }
+
         body { 
-            margin: 0; 
-            background: linear-gradient(180deg, #f5f5f7 0%, #e5e5e7 100%); 
-            font-family: -apple-system, sans-serif; 
-            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            margin: 0; padding: 20px;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex; justify-content: center;
         }
-        .window { width: 90%; max-width: 440px; background: #fff; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); overflow: hidden; }
-        .title-bar { height: 52px; background: #fff; display: flex; align-items: center; padding: 0 20px; border-bottom: 0.5px solid #efefef; }
-        .dots { display: flex; gap: 8px; width: 60px; } 
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.r { background: var(--dot-r); } .dot.y { background: var(--dot-y); } .dot.g { background: var(--dot-g); }
-        .bar-title { flex: 1; text-align: center; font-size: 14px; font-weight: 600; color: #1d1d1f; }
+
+        /* 온보딩 페이지와 동일한 macOS 윈도우 프레임 */
+        .window {
+            width: 100%; max-width: 440px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* 상단바: 테마 색상 적용 */
+        .title-bar {
+            height: 52px;
+            background: var(--theme-color);
+            display: flex; align-items: center;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        /* 신호등 버튼 */
+        .dots { display: flex; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.6); }
         
-        /* 뽀모도로 쿠커 스타일 화살표 버튼 */
-        .nav-controls { display: flex; gap: 8px; width: 64px; justify-content: flex-end; }
-        .circle-btn { 
-            width: 28px; height: 28px; border-radius: 50%; 
-            border: 1px solid #d2d2d7; background: none; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; color: #86868b;
-            transition: all 0.2s ease; padding: 0;
+        .bar-title {
+            flex: 1; text-align: center;
+            font-size: 14px; font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
         }
-        .circle-btn:hover:not(:disabled) { border-color: #1d1d1f; color: #1d1d1f; }
-        .circle-btn:disabled { opacity: 0.3; cursor: default; }
-        .circle-btn svg { width: 14px; height: 14px; }
 
-        .step { padding: 40px; display: none; min-height: 320px; animation: fadeIn 0.3s ease; } 
-        .step.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        h1 { font-size: 22px; margin: 0 0 8px; color: #1d1d1f; } 
-        .desc { font-size: 14px; color: var(--gray); margin-bottom: 25px; line-height: 1.5; }
-        input, select { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid #efefef; 
-            background: #fbfbfd; font-size: 15px; outline: none; box-sizing: border-box; transition: border-color 0.2s;
+        /* 상단 아이콘 세트 (뒤로가기, 돋보기) */
+        .nav-icons { display: flex; gap: 12px; }
+        .nav-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 4px; display: flex; align-items: center;
+            color: var(--text-main); /* 상단바 타이틀과 동일 톤 */
+            transition: opacity 0.2s;
         }
-        input:focus { border-color: #1d1d1f; }
-        .color-dot { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
-        .color-dot:hover { transform: scale(1.1); }
-        .color-dot.selected { border-color: #1d1d1f; box-shadow: 0 0 0 2px #fff inset; }
+        .nav-btn:hover { opacity: 0.6; }
+        .nav-btn svg { width: 20px; height: 20px; }
+
+        /* 검색 영역: 회색 고정 */
+        .search-area {
+            padding: 16px 20px;
+            background: var(--gray-bg);
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .search-box {
+            display: flex; background: #ffffff;
+            border-radius: 12px; border: 1px solid #e5e5e7;
+            padding: 2px 4px;
+        }
+
+        input {
+            flex: 1; padding: 10px 14px;
+            border: none; background: none;
+            font-size: 14px; outline: none;
+        }
+
+        /* 검색창 내부의 돋보기 버튼 */
+        .inner-search-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 8px; color: var(--theme-color);
+            display: flex; align-items: center;
+        }
+
+        /* 책 리스트 영역 */
+        .results {
+            height: 380px; overflow-y: auto;
+            padding: 10px;
+        }
+
+        .book-item {
+            display: flex; gap: 14px; padding: 14px;
+            border-radius: 14px; cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        /* 마우스 오버 시 선택한 테마 색상이 옅게 드리움 */
+        .book-item:hover {
+            background: var(--theme-color-light);
+        }
+
+        .book-cover {
+            width: 54px; height: 78px; background: #f0f0f0;
+            border-radius: 6px; object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .book-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .book-title { font-size: 14px; font-weight: 600; color: #1d1d1f; margin-bottom: 4px; }
+        .book-author { font-size: 12px; color: var(--text-sub); }
+
+        /* Saved! 토스트 알림 */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #fff;
+            padding: 10px 22px; border-radius: 25px;
+            font-size: 13px; font-weight: 500;
+            opacity: 0; transition: opacity 0.3s, bottom 0.3s;
+            pointer-events: none; z-index: 1000;
+        }
+        .toast.show { opacity: 1; bottom: 40px; }
+
+        /* 스크롤바 디자인 */
+        .results::-webkit-scrollbar { width: 6px; }
+        .results::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
     </style>
 </head>
 <body>
+
 <div class="window">
     <div class="title-bar">
-        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
         <div class="bar-title">Bookshelves</div>
-        <div class="nav-controls">
-            <button class="circle-btn" id="pBtn" onclick="mv(-1)" disabled>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="nav-icons">
+            <button class="nav-btn" onclick="goBack()" title="뒤로가기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
             </button>
-            <button class="circle-btn" id="nBtn" onclick="mv(1)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <button class="nav-btn" onclick="focusSearch()" title="검색">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
             </button>
         </div>
     </div>
 
-    <div class="step active" id="s1">
-        <h1>Connect Notion</h1>
-        <p class="desc">★ 우선 API 토큰을 발급받고, 아카이빙 페이지와 연동해주세요.</p>
-        <input type="password" id="tk" placeholder="secret_xxxx" onkeypress="if(event.keyCode==13)mv(1)">
-        <a href="https://www.notion.so/profile/integrations" target="_blank" style="font-size:11px; color:var(--gray); text-decoration:none; margin-top:15px; display:block;">내 인티그레이션 바로가기 ↗</a>
+    <div class="search-area">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="책 제목을 입력하고 Enter" onkeypress="handleEnter(event)">
+            <button class="inner-search-btn" onclick="performSearch()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
     </div>
 
-    <div class="step" id="s2">
-        <h1>Select Library</h1>
-        <p class="desc">도서를 저장할 데이터베이스를 선택하세요.</p>
-        <select id="db"></select>
-    </div>
-
-    <div class="step" id="s3">
-        <h1>Personalize</h1>
-        <p class="desc">알라딘 TTB 키를 입력하세요.</p>
-        <input type="text" id="ttb" placeholder="ttbxxx" onkeypress="if(event.keyCode==13)mv(1)">
-    </div>
-
-    <div class="step" id="s4">
-        <h1>Design</h1>
-        <p class="desc">위젯의 테마 색상을 선택하세요.</p>
-        <div style="display:flex; gap:12px; flex-wrap: wrap;" id="pal"></div>
+    <div class="results" id="bookList">
+        <p style="text-align:center; color:#86868b; font-size:13px; margin-top:60px;">어떤 책을 읽으셨나요? 📚</p>
     </div>
 </div>
 
+<div class="toast" id="saveToast">Saved to Notion! 🤍</div>
+
 <script>
-    let step = 1; 
-    let selCol = "f7cbd6";
-    const colors = ['f7cbd6', 'f9d5bb', 'ffffff', 'f6e8b1', 'b4e4c0', 'aac4f2'];
-    const SERVER = "https://bookshelves-server.onrender.com";
+    // 🎨 테마 설정 (온보딩의 선택 값을 변수로 받음)
+    const userThemeColor = "#f7cbd6"; // 실제로는 파라미터로 받을 수 있게 세팅 가능
+    document.documentElement.style.setProperty('--theme-color', userThemeColor);
+    document.documentElement.style.setProperty('--theme-color-light', userThemeColor + "33");
 
-    window.onload = () => {
-        const pal = document.getElementById('pal');
-        pal.innerHTML = colors.map(c => `<div class="color-dot" style="background:#${c};" onclick="sel('${c}')" id="c-${c}"></div>`).join('');
-        sel(selCol);
-    };
-
-    function sel(c) { 
-        selCol = c; 
-        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
-        document.getElementById('c-'+c).classList.add('selected');
-    }
-
-    async function mv(n) {
-        if(n === 1 && step === 1) {
-            const tkVal = document.getElementById('tk').value;
-            if(!tkVal) return alert('토큰을 입력해주세요.');
-            
-            // 데이터베이스 불러오기
-            const res = await fetch(SERVER + '/api/notion/databases', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ token: tkVal }) 
-            });
-            const dbs = await res.json();
-            
-            // 문제 해결: 백틱 안의 ${} 충돌을 피하기 위해 분리해서 처리
-            let options = "";
-            dbs.forEach(item => {
-                options += '<option value="' + item.id + '">' + item.title + '</option>';
-            });
-            document.getElementById('db').innerHTML = options;
+    // ⌨️ 엔터키 검색 기능
+    function handleEnter(e) {
+        if (e.key === 'Enter') {
+            performSearch();
         }
-
-        if(step + n === 5) return fin();
-        
-        document.getElementById('s' + step).classList.remove('active');
-        step += n;
-        document.getElementById('s' + step).classList.add('active');
-        
-        // 버튼 활성화 처리
-        document.getElementById('pBtn').disabled = (step === 1);
     }
 
-    function fin() {
-        const params = new URLSearchParams({ 
-            t: btoa(document.getElementById('tk').value), 
-            d: btoa(document.getElementById('db').value), 
-            k: btoa(document.getElementById('ttb').value), 
-            bg: selCol 
-        });
-        const finalUrl = SERVER + '/widget?' + params.toString();
-        navigator.clipboard.writeText(finalUrl);
-        alert('설정 완료! 복사된 URL을 노션에 /embed 하세요. 🤍');
+    function focusSearch() {
+        document.getElementById('searchInput').focus();
+    }
+
+    function goBack() {
+        console.log("뒤로가기 실행");
+        // 이전 단계로 이동하는 로직 추가
+    }
+
+    function performSearch() {
+        const query = document.getElementById('searchInput').value;
+        if(!query) return;
+        
+        // 검색 중 로딩 표시
+        document.getElementById('bookList').innerHTML = '<p style="text-align:center; padding-top:40px; font-size:13px;">검색 중...</p>';
+        
+        // [여기에 알라딘/네이버 검색 API 호출 로직이 들어갑니다]
+        // 예시 데이터 출력
+        setTimeout(() => {
+            const mockData = [
+                { title: "파과 (리커버)", author: "구병모 (지은이)", cover: "https://image.aladin.co.kr/product/14023/11/cover500/k342532152_1.jpg" },
+                { title: "파과 각본집", author: "민규동, 김동완 (지은이)", cover: "https://image.aladin.co.kr/product/29000/11/cover500/k123456789_1.jpg" }
+            ];
+            renderResults(mockData);
+        }, 600);
+    }
+
+    function renderResults(books) {
+        const list = document.getElementById('bookList');
+        list.innerHTML = books.map(book => `
+            <div class="book-item" onclick="saveToNotion('${book.title}')">
+                <img src="${book.cover}" class="book-cover">
+                <div class="book-info">
+                    <div class="book-title">${book.title}</div>
+                    <div class="book-author">${book.author}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function saveToNotion(title) {
+        // [여기에 노션 DB 이식 API 호출 로직이 들어갑니다]
+        
+        // Saved! 토스트 띄우기
+        const toast = document.getElementById('saveToast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
     }
 </script>
+
 </body>
 </html>
