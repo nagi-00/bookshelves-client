@@ -10,13 +10,13 @@
             --accent-color: #1d1d1f;
             --hover-color: rgba(0, 0, 0, 0.04);
             --shadow-pale: 0 4px 12px rgba(0,0,0,0.06);
-            --dark-theme-color: #333; /* 시계용 어두운 테마색 */
+            --dark-theme-color: #333;
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; letter-spacing: -0.01em; }
         body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; padding: 20px; }
 
-        /* --- [1] 온보딩 창 (디자인 절대 유지) --- */
+        /* --- [1] 온보딩 창 (디자인 절대 보존) --- */
         .window {
             width: 100%; max-width: 420px; background: #fff; border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;
@@ -40,11 +40,9 @@
         .color-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px #ddd; }
         .color-dot.active { box-shadow: 0 0 0 2px #333; }
 
-        /* --- [2] 위젯 디자인 수정 (세로 절반 축소 및 스타일 변경) --- */
+        /* --- [2] 위젯 디자인 수정 (디자인 정밀 조정) --- */
         .widget-frame {
-            width: 240px; 
-            height: 175px; /* 세로 길이를 기존 350px의 절반인 175px로 축소 */
-            background: #fff; border-radius: 16px;
+            width: 240px; height: 175px; background: #fff; border-radius: 16px;
             box-shadow: var(--shadow-pale); overflow: hidden; display: flex; flex-direction: column;
             border: 1px solid rgba(0,0,0,0.05);
         }
@@ -52,44 +50,36 @@
         .widget-top {
             height: 32px; background: var(--theme-color);
             display: flex; align-items: center; padding: 0 10px; transition: 0.3s;
+            position: relative; /* 중앙 정렬을 위한 기준 */
         }
-        /* 위젯 내 신호등 복구 */
-        .w-dots { display: flex; gap: 4.5px; margin-right: 10px; }
+        .w-dots { display: flex; gap: 4.5px; position: absolute; left: 10px; } /* 위치 고정 */
         .w-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,0,0,0.12); }
-        .w-title { font-size: 10px; font-weight: 700; color: #1d1d1f; flex: 1; text-align: left; }
+        .w-title { font-size: 10px; font-weight: 700; color: #1d1d1f; width: 100%; text-align: center; } /* 중앙 정렬 */
 
-        /* 홈 시계 화면 수정 */
+        /* 홈 시계 화면 */
         #widgetHome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 5px; }
-        #currentTime { 
-            font-size: 32px; 
-            font-weight: 800; /* 볼드체로 변경 */
-            color: var(--dark-theme-color); /* 선택한 색의 어두운 버전 */
-            line-height: 0.9; /* 높이 줄임 */
-            margin-bottom: 2px; 
-        }
+        #currentTime { font-size: 32px; font-weight: 800; color: var(--dark-theme-color); line-height: 0.9; margin-bottom: 2px; }
         #currentDate { font-size: 8px; color: #bbb; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
         
-        /* Search 버튼 수정 */
         .search-trigger {
-            background: rgba(0,0,0,0.03); /* 더 연한 배경 */
-            border: 0.5px solid rgba(0,0,0,0.05); /* 더 연한 테두리 */
-            padding: 3px 12px; /* 글자에 붙게 크기 축소 */
-            border-radius: 12px;
-            font-size: 9px; /* 작게 줄임 */
-            font-weight: 300; /* 얇게 수정 */
-            color: var(--theme-color); /* 글자색을 사용자 선택색으로 */
-            cursor: pointer; transition: 0.2s;
-            filter: contrast(0.8) brightness(0.8); /* 배경색에 묻히지 않게 살짝 보정 */
+            background: rgba(0,0,0,0.03); border: 0.5px solid rgba(0,0,0,0.05);
+            padding: 3px 12px; border-radius: 12px; font-size: 9px; font-weight: 300;
+            color: var(--theme-color); cursor: pointer; transition: 0.2s;
+            filter: contrast(0.8) brightness(0.8);
         }
 
-        /* 검색 화면 (세로가 짧아졌으므로 내부 레이아웃 최적화) */
+        /* 검색 화면 (뒤로가기 버튼 추가) */
         #widgetSearch { display: none; flex: 1; flex-direction: column; overflow: hidden; }
         .search-area { padding: 8px; background: #fafafa; }
         .search-box {
             background: #fff; border-radius: 6px; border: 1px solid #e5e5e7;
             display: flex; align-items: center; padding: 0 8px; height: 26px;
         }
-        .search-box input { border: none; background: none; font-size: 10px; width: 100%; outline: none; height: 100%; line-height: 26px; }
+        /* 검색창 내부 텍스트 세로 중앙 정렬 수정 */
+        .search-box input { 
+            border: none; background: none; font-size: 10px; width: 100%; outline: none; 
+            height: 100%; line-height: 26px; padding: 0 4px; display: flex; align-items: center;
+        }
 
         .book-list { flex: 1; overflow-y: auto; padding: 4px; }
         .book-card { display: flex; gap: 8px; padding: 6px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 3px; align-items: center; }
@@ -98,7 +88,9 @@
         .b-title { font-size: 9px; font-weight: 700; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .b-author { font-size: 8px; color: #999; }
 
-        .nav-btn { background: none; border: none; cursor: pointer; color: #555; padding: 4px; }
+        .icon-btn { background: none; border: none; cursor: pointer; color: #aaa; padding: 0; display: flex; align-items: center; transition: 0.2s; }
+        .icon-btn:hover { color: #555; }
+
         #toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 11px; transition: 0.4s; z-index: 100; }
         #toast.show { bottom: 30px; }
         body.is-embed .window { display: none; }
@@ -111,8 +103,8 @@
             <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
             <div class="bar-title">Bookshelves Cooker</div>
             <div class="nav-controls">
-                <button class="nav-btn" id="prevBtn" onclick="moveStep(-1)" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
-                <button class="nav-btn" id="nextBtn" onclick="moveStep(1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+                <button class="nav-btn" id="prevBtn" style="background:none; border:none; cursor:pointer;" onclick="moveStep(-1)" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <button class="nav-btn" id="nextBtn" style="background:none; border:none; cursor:pointer;" onclick="moveStep(1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
             </div>
         </div>
         <div class="content">
@@ -140,8 +132,13 @@
         <div id="widgetSearch">
             <div class="search-area">
                 <div class="search-box">
+                    <button class="icon-btn" onclick="goHome()" style="margin-right: 4px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
                     <input type="text" id="searchInput" placeholder="Search books..." onkeypress="if(event.key==='Enter')performSearch()">
-                    <svg onclick="performSearch()" style="cursor:pointer" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <button class="icon-btn" onclick="performSearch()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </button>
                 </div>
             </div>
             <div class="book-list" id="resultList"></div>
@@ -168,6 +165,11 @@
         document.getElementById('searchInput').focus();
     }
 
+    function goHome() {
+        document.getElementById('widgetSearch').style.display = 'none';
+        document.getElementById('widgetHome').style.display = 'flex';
+    }
+
     if (params.get('t')) {
         document.body.classList.add('is-embed');
         const c = params.get('c');
@@ -190,8 +192,6 @@
     function updateTheme(hex) {
         selectedColor = hex.replace('#', '');
         document.documentElement.style.setProperty('--theme-color', hex);
-        
-        // 어두운 테마색 계산 (시계용)
         const r = parseInt(selectedColor.slice(0,2), 16), g = parseInt(selectedColor.slice(2,4), 16), b = parseInt(selectedColor.slice(4,6), 16);
         const darkR = Math.max(0, r - 100), darkG = Math.max(0, g - 100), darkB = Math.max(0, b - 100);
         document.documentElement.style.setProperty('--dark-theme-color', `rgb(${darkR},${darkG},${darkB})`);
@@ -210,7 +210,7 @@
             const d = btoa(document.getElementById('dbSelect').value);
             const k = btoa(document.getElementById('ttbInput').value);
             const url = `${window.location.origin}${window.location.pathname}?t=${t}&d=${d}&k=${k}&c=${selectedColor}`;
-            navigator.clipboard.writeText(url); alert("URL 복사 완료!"); return;
+            navigator.clipboard.writeText(url); alert("위젯이 생성되었습니다! 노션에 /embed 후 붙여넣으세요. 🤍 "); return;
         }
         document.getElementById(`step${step}`).classList.remove('active');
         step += n;
