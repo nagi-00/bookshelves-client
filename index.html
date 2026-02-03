@@ -144,7 +144,7 @@
                 <h1>Customize</h1>
                 <p>TTB 키와 위젯 디자인을 설정하세요.</p>
                 <input type="text" id="ttbInput" placeholder="알라딘 TTB 키">
-                    <select id="clockType" style="margin-bottom: 10px;">
+                <select id="clockType" style="margin-bottom: 10px;" onchange="setClockType(this.value)">
                     <option value="digital">디지털 시계</option>
                     <option value="analog">아날로그 시계</option>
                 </select>
@@ -379,23 +379,38 @@
         document.getElementById('prevBtn').disabled = (step === 1);
     }
 
+    // 전역 변수 추가: 검색 결과를 저장하여 인덱스로 접근
+    let searchResults = [];
+
     async function performSearch() {
         const query = document.getElementById('searchInput').value;
-        const res = await fetch(`${SERVER_URL}/api/search?k=${atob(params.get('k'))}&q=${encodeURIComponent(query)}`);
-        const books = await res.json();
-        document.getElementById('resultList').innerHTML = books.map(b => {
-            // 아카이빙 실패 방지를 위한 데이터 인코딩
-            const safeData = encodeURIComponent(JSON.stringify(b));
-            return `
-            <div class="book-card" onclick="saveToNotion('${safeData}')">
-                <img src="${b.cover}" class="book-cover" onerror="this.src='https://via.placeholder.com/150x200?text=No+Image'">
-                <div class="book-info"><div class="b-title">${b.title}</div><div class="b-author">${b.author}</div></div>
-            </div>
-        `}).join('');
+        try {
+            const res = await fetch(`${SERVER_URL}/api/search?k=${atob(params.get('k'))}&q=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error("Server error");
+            const books = await res.json();
+            
+            // 결과를 전역 변수에 저장
+            searchResults = books;
+
+            document.getElementById('resultList').innerHTML = books.map((b, index) => {
+                // 인덱스를 사용하여 데이터 저장 함수 호출
+                return `
+                <div class="book-card" onclick="saveBookByIndex(${index})">
+                    <img src="${b.cover}" class="book-cover" onerror="this.src='https://via.placeholder.com/150x200?text=No+Image'">
+                    <div class="book-info"><div class="b-title">${b.title}</div><div class="b-author">${b.author || '저자 미상'}</div></div>
+                </div>
+            `}).join('');
+        } catch (e) {
+            console.error(e);
+            document.getElementById('resultList').innerHTML = '<div style="padding:10px;text-align:center;color:#999;font-size:11px;">검색 중 오류가 발생했거나 결과가 없네.<br>다시 시도해보게.</div>';
+        }
     }
 
-    async function saveToNotion(encodedData) {
-        const book = JSON.parse(decodeURIComponent(encodedData));
+    // 기존 saveToNotion을 대체하는 함수 (인덱스 사용)
+    async function saveBookByIndex(index) {
+        const book = searchResults[index];
+        if (!book) return;
+
         const res = await fetch(`${SERVER_URL}/api/notion/save`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ 
@@ -414,3 +429,5 @@
         }
     }
 </script>
+</body>
+</html>
