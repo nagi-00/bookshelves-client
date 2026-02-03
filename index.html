@@ -39,6 +39,7 @@
         .color-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px #ddd; }
         .color-dot.active { box-shadow: 0 0 0 2px #333; }
 
+        /* 위젯 크기 강제 고정 */
         .widget-frame {
             width: 240px !important; 
             height: 175px !important; 
@@ -58,16 +59,16 @@
         .w-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,0,0,0.12); }
         .w-title { font-size: 10px; font-weight: 700; color: #1d1d1f; width: 100%; text-align: center; }
 
-        #widgetHome { flex: 1; display: flex; flex-direction: row; height: 143px; }
+    #widgetHome { flex: 1; display: flex; flex-direction: row; height: 143px; }
         .home-left {
             flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: flex-start; /* 왼쪽 정렬 */
+            align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 8px;
             border-right: 1px solid rgba(0,0,0,0.06);
-            padding: 20px; /* 여백 조정 */
+            padding: 10px;
         }
         .home-right {
             flex: 1;
@@ -77,26 +78,20 @@
             justify-content: center;
             padding: 10px;
         }
-
-        /* 버튼에서 밑줄 텍스트 링크로 스타일 변경 */
-        .text-link {
-            background: none; border: none; padding: 0;
-            font-size: 11px; font-weight: 500;
-            color: var(--dark-theme-color);
-            text-decoration: underline;
-            text-underline-offset: 3px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            filter: contrast(0.7);
-        }
-        .text-link:hover { opacity: 0.6; }
-
         #digitalClock { display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #currentTime { font-size: 28px; font-weight: 800; color: var(--dark-theme-color); line-height: 0.9; margin-bottom: 2px; }
         #currentDate, #currentDateAnalog { font-size: 8px; color: #bbb; font-weight: 700; text-transform: uppercase; }
         #analogClock { display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #clockCanvas { margin-bottom: 4px; }
+        .link-btn { margin-top: 0 !important; }
         
+        .search-trigger {
+            background: rgba(0,0,0,0.03); border: 0.5px solid rgba(0,0,0,0.05);
+            padding: 3px 12px; border-radius: 12px; font-size: 9px; font-weight: 300;
+            color: var(--theme-color); cursor: pointer; transition: 0.2s;
+            filter: contrast(0.8) brightness(0.8);
+        }
+
         #widgetSearch { display: none; flex: 1; flex-direction: column; overflow: hidden; height: 143px; }
         .search-area { padding: 8px; background: #fafafa; flex-shrink: 0; }
         .search-box {
@@ -156,7 +151,7 @@
                 <input type="url" id="linkInput" placeholder="바로가기 링크 URL (선택사항)">
                 <div class="color-palette" id="palette"></div>
                 <input type="color" id="cp" style="visibility:hidden;width:0;height:0;" oninput="updateTheme(this.value)">
-                <button class="search-trigger" style="background:#f5f5f7;color:#999;font-weight:600;font-size:11px;border:none;border-radius:12px;padding:3px 12px;cursor:pointer;" onclick="document.getElementById('cp').click()">Custom Color</button>
+                <button class="search-trigger" style="background:#f5f5f7;color:#999;font-weight:600;font-size:11px;" onclick="document.getElementById('cp').click()">Custom Color</button>
             </div>
         </div>
     </div>
@@ -165,8 +160,8 @@
         <div class="widget-top"><div class="w-dots"><div class="w-dot"></div><div class="w-dot"></div><div class="w-dot"></div></div><div class="w-title">Bookshelves</div></div>
         <div id="widgetHome">
             <div class="home-left">
-                <button class="text-link" onclick="showSearch()">Search</button>
-                <button class="text-link" id="linkBtn" onclick="openLink()" style="display:none;">Link</button>
+                <button class="search-trigger" onclick="showSearch()">Search</button>
+                <button class="search-trigger link-btn" id="linkBtn" onclick="openLink()" style="display:none;">Link</button>
             </div>
             <div class="home-right">
                 <div id="digitalClock">
@@ -223,6 +218,7 @@
         ctx.save();
         ctx.translate(radius, radius);
  
+        // 배경 원
         ctx.beginPath();
         ctx.arc(0, 0, radius - 4, 0, 2 * Math.PI);
         ctx.fillStyle = '#fafafa';
@@ -231,6 +227,7 @@
         ctx.lineWidth = 1;
         ctx.stroke();
  
+        // 시간 마커
         for (let i = 0; i < 12; i++) {
             const angle = (i * Math.PI / 6) - Math.PI / 2;
             const x1 = Math.cos(angle) * (radius - 10);
@@ -249,6 +246,7 @@
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
  
+        // 시침
         const hourAngle = (hours + minutes / 60) * Math.PI / 6 - Math.PI / 2;
         ctx.beginPath();
         ctx.moveTo(0, 0);
@@ -258,6 +256,7 @@
         ctx.lineCap = 'round';
         ctx.stroke();
  
+        // 분침
         const minAngle = (minutes + seconds / 60) * Math.PI / 30 - Math.PI / 2;
         ctx.beginPath();
         ctx.moveTo(0, 0);
@@ -266,6 +265,7 @@
         ctx.lineWidth = 2;
         ctx.stroke();
  
+        // 초침
         const secAngle = seconds * Math.PI / 30 - Math.PI / 2;
         ctx.beginPath();
         ctx.moveTo(0, 0);
@@ -274,6 +274,7 @@
         ctx.lineWidth = 1;
         ctx.stroke();
  
+        // 중심점
         ctx.beginPath();
         ctx.arc(0, 0, 3, 0, 2 * Math.PI);
         ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--dark-theme-color').trim() || '#333';
@@ -395,15 +396,22 @@
     }
 
     async function saveBookByIndex(index) {
+        // 객체의 깊은 복사를 통해 원본 데이터를 훼손하지 않고 수정하네
         const originalBook = searchResults[index];
         if (!originalBook) return;
+        
         const cleanBook = JSON.parse(JSON.stringify(originalBook));
+
+        // description 필드가 있다면 HTML 태그와 엔티티를 정제하네
         if (cleanBook.description) {
+            // 1. HTML 태그 제거
             let text = cleanBook.description.replace(/<[^>]*>?/gm, ' ');
+            // 2. HTML 엔티티(&lt;, &amp; 등)를 일반 문자로 변환
             const tempDiv = document.createElement("textarea");
             tempDiv.innerHTML = text;
             cleanBook.description = tempDiv.value;
         }
+
         const res = await fetch(`${SERVER_URL}/api/notion/save`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ 
