@@ -6,115 +6,288 @@
     <title>Bookshelves Cooker</title>
     <style>
         :root {
-            --theme-color: #ffffff; 
-            --accent-color: #1d1d1f;
-            --hover-color: rgba(0, 0, 0, 0.04);
-            --shadow-pale: 0 4px 12px rgba(0,0,0,0.06);
-            --dark-theme-color: #333;
+            --bg-color: #e8ecef;
+            --theme-color: #e8ecef;
+            --accent-color: #7ec8c8;
+            --accent-secondary: #e8bcbc;
+            --text-primary: #5a6e7f;
+            --text-secondary: #8fa3b1;
+            --shadow-dark: rgba(163,177,198,0.6);
+            --shadow-light: rgba(255,255,255,0.8);
+            --dark-theme-color: #5a6e7f;
         }
 
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; letter-spacing: -0.01em; }
-        body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; padding: 20px; }
+        * { box-sizing: border-box; font-family: 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; letter-spacing: -0.01em; }
+        body {
+            margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: var(--bg-color); padding: 20px;
+        }
 
+        /* 뉴모피즘 볼록 효과 */
+        .neu-convex {
+            background: var(--bg-color);
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+        }
+
+        /* 뉴모피즘 오목 효과 */
+        .neu-concave {
+            background: var(--bg-color);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+        }
+
+        /* 설정 창 */
         .window {
-            width: 100%; max-width: 420px; background: #fff; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column;
-            margin-bottom: 25px; z-index: 10;
+            width: 100%; max-width: 420px;
+            background: var(--bg-color); border-radius: 30px;
+            box-shadow: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
+            overflow: hidden; display: flex; flex-direction: column;
+            margin-bottom: 30px; z-index: 10; border: none;
         }
-        .title-bar { height: 50px; background: #fff; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .dots { display: flex; gap: 7px; flex: 1; }
-        .dot { width: 11px; height: 11px; border-radius: 50%; }
-        .dot.red { background: #e8bcbc; } .dot.yellow { background: #f4f4bd; } .dot.green { background: #c5e8c5; }
-        .bar-title { font-size: 13px; font-weight: 700; color: #333; flex: 2; text-align: center; }
+
+        .title-bar {
+            height: 56px; background: var(--bg-color);
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: none;
+        }
+        .dots { display: flex; gap: 8px; flex: 1; }
+        .dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+        }
+        .dot.red { background: linear-gradient(145deg, #f0c4c4, #dba8a8); }
+        .dot.yellow { background: linear-gradient(145deg, #f5f5c4, #e0e0a8); }
+        .dot.green { background: linear-gradient(145deg, #c4e8c4, #a8d4a8); }
+
+        .bar-title { font-size: 14px; font-weight: 700; color: var(--text-primary); flex: 2; text-align: center; }
+
         .nav-controls { flex: 1; display: flex; justify-content: flex-end; gap: 12px; }
-        .content { padding: 30px 25px; min-height: 280px; position: relative; }
+        .nav-btn {
+            width: 36px; height: 36px; border-radius: 12px;
+            background: var(--bg-color);
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+        .nav-btn:active {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+        }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .content { padding: 30px 28px 35px; min-height: 280px; position: relative; }
         .step { display: none; animation: fadeUp 0.3s ease; }
         .step.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        h1 { font-size: 20px; font-weight: 800; margin: 0 0 8px; color: #1d1d1f; }
-        p { font-size: 13px; color: #86868b; margin-bottom: 20px; line-height: 1.4; }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #eee; background: #f9f9fc; outline: none; font-size: 13px; margin-bottom: 10px; }
-        .color-palette { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-        .color-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px #ddd; }
-        .color-dot.active { box-shadow: 0 0 0 2px #333; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 위젯 크기 강제 고정 */
+        h1 { font-size: 22px; font-weight: 800; margin: 0 0 10px; color: var(--text-primary); }
+        p { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
+
+        /* 입력 필드 (오목 효과) */
+        input, select {
+            width: 100%; padding: 14px 18px; border-radius: 16px;
+            border: none;
+            background: var(--bg-color);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            outline: none; font-size: 13px; margin-bottom: 14px;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        input::placeholder { color: var(--text-secondary); }
+        input:focus, select:focus {
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+        }
+
+        .color-palette { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .color-dot {
+            width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+            border: none;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            transition: all 0.2s ease;
+        }
+        .color-dot:hover { transform: scale(1.1); }
+        .color-dot.active {
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.15), inset -2px -2px 4px rgba(255,255,255,0.5);
+        }
+
+        /* 위젯 프레임 */
         .widget-frame {
-            width: 240px !important; 
-            height: 175px !important; 
-            background: #fff; border-radius: 16px;
-            box-shadow: var(--shadow-pale); overflow: hidden; display: flex; flex-direction: column;
-            border: 1px solid rgba(0,0,0,0.05); margin: 0 auto;
+            width: 260px !important;
+            height: 185px !important;
+            background: var(--bg-color);
+            border-radius: 28px;
+            box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+            overflow: hidden; display: flex; flex-direction: column;
+            border: none; margin: 0 auto;
             position: relative;
         }
-        body.is-embed .widget-frame { width: 240px !important; height: 175px !important; }
+        body.is-embed .widget-frame { width: 260px !important; height: 185px !important; }
+        body.is-embed { background: var(--bg-color); }
 
         .widget-top {
-            height: 32px; background: var(--theme-color);
-            display: flex; align-items: center; padding: 0 10px; transition: 0.3s;
+            height: 36px; background: var(--bg-color);
+            display: flex; align-items: center; padding: 0 14px; transition: 0.3s;
             position: relative; flex-shrink: 0;
         }
-        .w-dots { display: flex; gap: 4.5px; position: absolute; left: 10px; }
-        .w-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,0,0,0.12); }
-        .w-title { font-size: 10px; font-weight: 700; color: #1d1d1f; width: 100%; text-align: center; }
+        .w-dots { display: flex; gap: 5px; position: absolute; left: 14px; }
+        .w-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--accent-color);
+            box-shadow: 1px 1px 2px var(--shadow-dark), -1px -1px 2px var(--shadow-light);
+            opacity: 0.7;
+        }
+        .w-title { font-size: 11px; font-weight: 700; color: var(--text-primary); width: 100%; text-align: center; }
 
-    #widgetHome { flex: 1; display: flex; flex-direction: row; height: 143px; }
+        #widgetHome { flex: 1; display: flex; flex-direction: row; height: 149px; padding: 12px; gap: 12px; }
+
         .home-left {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            border-right: 1px solid rgba(0,0,0,0.06);
-            padding: 10px;
+            gap: 10px;
+            padding: 8px;
         }
+
         .home-right {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 8px;
         }
-        #digitalClock { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #currentTime { font-size: 28px; font-weight: 800; color: var(--dark-theme-color); line-height: 0.9; margin-bottom: 2px; }
-        #currentDate, #currentDateAnalog { font-size: 8px; color: #bbb; font-weight: 700; text-transform: uppercase; }
-        #analogClock { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #clockCanvas { margin-bottom: 4px; }
-        .link-btn { margin-top: 0 !important; }
-        
+
+        #digitalClock {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg-color);
+            border-radius: 20px;
+            padding: 16px 20px;
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+        }
+        #currentTime {
+            font-size: 26px; font-weight: 800; color: var(--text-primary);
+            line-height: 1; margin-bottom: 4px;
+        }
+        #currentDate, #currentDateAnalog {
+            font-size: 9px; color: var(--text-secondary);
+            font-weight: 600; text-transform: uppercase;
+        }
+
+        #analogClock {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .clock-face {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            position: relative;
+            margin-bottom: 6px;
+        }
+        #clockCanvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 버튼 스타일 */
         .search-trigger {
-            background: rgba(0,0,0,0.03); border: 0.5px solid rgba(0,0,0,0.05);
-            padding: 3px 12px; border-radius: 12px; font-size: 9px; font-weight: 300;
-            color: var(--theme-color); cursor: pointer; transition: 0.2s;
-            filter: contrast(0.8) brightness(0.8);
+            background: var(--bg-color);
+            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+            border: none;
+            padding: 10px 20px; border-radius: 14px;
+            font-size: 10px; font-weight: 600;
+            color: var(--text-primary); cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 70px;
         }
+        .search-trigger:hover {
+            color: var(--accent-color);
+        }
+        /* 위젯 내 버튼은 테마색 적용 */
+        #widgetHome .search-trigger {
+            color: var(--accent-color);
+        }
+        #widgetHome .search-trigger:hover {
+            filter: brightness(0.9);
+        }
+        .search-trigger:active {
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        }
+        .link-btn { margin-top: 0 !important; }
 
-        #widgetSearch { display: none; flex: 1; flex-direction: column; overflow: hidden; height: 143px; }
-        .search-area { padding: 8px; background: #fafafa; flex-shrink: 0; }
+        #widgetSearch { display: none; flex: 1; flex-direction: column; overflow: hidden; height: 149px; padding: 10px; }
+        .search-area { padding: 0 0 8px 0; flex-shrink: 0; }
         .search-box {
-            background: #fff; border-radius: 6px; border: 1px solid #e5e5e7;
-            display: flex; align-items: center; padding: 0 8px; height: 26px;
+            background: var(--bg-color);
+            border-radius: 14px; border: none;
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            display: flex; align-items: center; padding: 0 12px; height: 32px;
         }
-        .search-box input { 
-            border: none; background: none; font-size: 10px; width: 100%; outline: none; 
-            height: 100%; line-height: normal; padding: 0 4px; display: flex; align-items: center;
+        .search-box input {
+            border: none; background: none; font-size: 11px; width: 100%; outline: none;
+            height: 100%; line-height: normal; padding: 0 6px;
+            color: var(--text-primary);
+            box-shadow: none;
+            margin: 0;
+        }
+        .search-box input::placeholder { color: var(--text-secondary); }
+
+        .book-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+        .book-card {
+            display: flex; gap: 10px; padding: 8px;
+            border-radius: 14px; cursor: pointer;
+            transition: all 0.2s ease; margin-bottom: 6px; align-items: center;
+            background: var(--bg-color);
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+        .book-card:hover {
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        }
+        .book-card:active {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+        }
+        .book-cover {
+            width: 32px; height: 46px; border-radius: 6px;
+            object-fit: cover; background: var(--bg-color); flex-shrink: 0;
+            box-shadow: 2px 2px 4px var(--shadow-dark);
+        }
+        .b-title { font-size: 9px; font-weight: 700; color: var(--text-primary); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .b-author { font-size: 8px; color: var(--text-secondary); margin-top: 2px; }
+
+        .icon-btn {
+            background: var(--bg-color); border: none; cursor: pointer;
+            color: var(--text-secondary); padding: 4px;
+            display: flex; align-items: center;
+            border-radius: 8px;
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+            transition: all 0.2s ease;
+        }
+        .icon-btn:active {
+            box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light);
         }
 
-        .book-list { flex: 1; overflow-y: auto; padding: 4px; }
-        .book-card { display: flex; gap: 8px; padding: 6px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 3px; align-items: center; }
-        .book-card:hover { background: var(--hover-color); }
-        .book-cover { width: 38px; height: 55px; border-radius: 3px; object-fit: cover; background: #f0f0f2; flex-shrink: 0; }
-        .b-title { font-size: 9px; font-weight: 700; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .b-author { font-size: 8px; color: #999; }
-
-        .icon-btn { background: none; border: none; cursor: pointer; color: #aaa; padding: 0; display: flex; align-items: center; }
-
-        #toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 11px; transition: 0.4s; z-index: 100; }
+        #toast {
+            position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%);
+            background: var(--bg-color); color: var(--text-primary);
+            padding: 12px 24px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            transition: 0.4s; z-index: 100;
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+        }
         #toast.show { bottom: 30px; }
         body.is-embed .window { display: none; }
+
+        /* 스크롤바 스타일 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--text-secondary); border-radius: 4px; }
+
+        /* 링크 스타일 */
+        a { color: var(--accent-color); text-decoration: none; transition: 0.2s; }
+        a:hover { color: var(--text-primary); }
     </style>
 </head>
 <body>
@@ -124,8 +297,8 @@
             <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
             <div class="bar-title">Bookshelves Cooker</div>
             <div class="nav-controls">
-                <button class="nav-btn" id="prevBtn" style="background:none;border:none;cursor:pointer;" onclick="moveStep(-1)" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
-                <button class="nav-btn" id="nextBtn" style="background:none;border:none;cursor:pointer;" onclick="moveStep(1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+                <button class="nav-btn" id="prevBtn" onclick="moveStep(-1)" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <button class="nav-btn" id="nextBtn" onclick="moveStep(1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
             </div>
         </div>
         <div class="content">
@@ -133,7 +306,7 @@
                 <h1>Connect Notion</h1>
                 <p>프라이빗 API 토큰을 입력하세요.</p>
                 <input type="password" id="tokenInput" placeholder="secret_...">
-                <div style="margin-top: 5px;"><a href="https://www.notion.so/my-integrations" target="_blank" style="font-size:12px; color:#86868b; text-decoration:none;">내 인테그레이션 바로가기 ↗</a></div>
+                <div style="margin-top: 8px;"><a href="https://www.notion.so/my-integrations" target="_blank" style="font-size:12px;">내 인테그레이션 바로가기 ↗</a></div>
             </div>
             <div class="step" id="step2">
                 <h1>Select Library</h1>
@@ -144,20 +317,23 @@
                 <h1>Customize</h1>
                 <p>TTB 키와 위젯 디자인을 설정하세요.</p>
                 <input type="text" id="ttbInput" placeholder="알라딘 TTB 키">
-                <select id="clockType" style="margin-bottom: 10px;" onchange="setClockType(this.value)">
+                <select id="clockType" onchange="setClockType(this.value)">
                     <option value="digital">디지털 시계</option>
                     <option value="analog">아날로그 시계</option>
                 </select>
                 <input type="url" id="linkInput" placeholder="바로가기 링크 URL (선택사항)">
                 <div class="color-palette" id="palette"></div>
-                <input type="color" id="cp" style="visibility:hidden;width:0;height:0;" oninput="updateTheme(this.value)">
-                <button class="search-trigger" style="background:#f5f5f7;color:#999;font-weight:600;font-size:11px;" onclick="document.getElementById('cp').click()">Custom Color</button>
+                <input type="color" id="cp" style="visibility:hidden;width:0;height:0;padding:0;margin:0;" oninput="updateTheme(this.value)">
+                <button class="search-trigger" style="width:100%;margin-top:8px;" onclick="document.getElementById('cp').click()">Custom Color</button>
             </div>
         </div>
     </div>
 
     <div class="widget-frame">
-        <div class="widget-top"><div class="w-dots"><div class="w-dot"></div><div class="w-dot"></div><div class="w-dot"></div></div><div class="w-title">Bookshelves</div></div>
+        <div class="widget-top">
+            <div class="w-dots"><div class="w-dot"></div><div class="w-dot"></div><div class="w-dot"></div></div>
+            <div class="w-title">Bookshelves</div>
+        </div>
         <div id="widgetHome">
             <div class="home-left">
                 <button class="search-trigger" onclick="showSearch()">Search</button>
@@ -169,7 +345,9 @@
                     <div id="currentDate">SUN, FEB 1</div>
                 </div>
                 <div id="analogClock" style="display:none;">
-                    <canvas id="clockCanvas" width="80" height="80"></canvas>
+                    <div class="clock-face">
+                        <canvas id="clockCanvas" width="74" height="74"></canvas>
+                    </div>
                     <div id="currentDateAnalog">SUN, FEB 1</div>
                 </div>
             </div>
@@ -177,112 +355,113 @@
         <div id="widgetSearch">
             <div class="search-area">
                 <div class="search-box">
-                    <button class="icon-btn" onclick="goHome()" style="margin-right: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                    <button class="icon-btn" onclick="goHome()" style="margin-right: 6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
                     <input type="text" id="searchInput" placeholder="Search books..." onkeypress="if(event.key==='Enter')performSearch()">
                 </div>
             </div>
             <div class="book-list" id="resultList"></div>
         </div>
     </div>
-    <div id="toast">Saved! 🤍</div>
+    <div id="toast">Saved!</div>
 
 <script>
     const SERVER_URL = "https://bookshelves-server.onrender.com";
-    const themes = ["e8bcbc", "f4f4bd", "c5e8c5", "a4c4e4", "ffffff", "1d1d1f"];
-    let step = 1, selectedColor = "ffffff";
+    const themes = ["7ec8c8", "e8bcbc", "f4e4a6", "b8d4e8", "d4c4e8", "a8d8a8"];
+    let step = 1, selectedColor = "e8ecef";
     const params = new URLSearchParams(window.location.search);
 
-   let clockType = 'digital';
+    let clockType = 'digital';
     let linkUrl = '';
- 
+
     function updateClock() {
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
- 
+
         document.getElementById('currentTime').innerText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
         document.getElementById('currentDate').innerText = dateStr;
         document.getElementById('currentDateAnalog').innerText = dateStr;
- 
+
         if (clockType === 'analog') {
             drawAnalogClock(now);
         }
     }
- 
+
     function drawAnalogClock(now) {
         const canvas = document.getElementById('clockCanvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         const radius = canvas.width / 2;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
- 
+
         ctx.save();
         ctx.translate(radius, radius);
- 
-        // 배경 원
+
+        // 배경 (투명 - 뉴모피즘 효과는 CSS에서)
         ctx.beginPath();
-        ctx.arc(0, 0, radius - 4, 0, 2 * Math.PI);
-        ctx.fillStyle = '#fafafa';
+        ctx.arc(0, 0, radius - 2, 0, 2 * Math.PI);
+        ctx.fillStyle = 'transparent';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
- 
+
         // 시간 마커
         for (let i = 0; i < 12; i++) {
             const angle = (i * Math.PI / 6) - Math.PI / 2;
-            const x1 = Math.cos(angle) * (radius - 10);
-            const y1 = Math.sin(angle) * (radius - 10);
-            const x2 = Math.cos(angle) * (radius - 6);
-            const y2 = Math.sin(angle) * (radius - 6);
+            const isMain = i % 3 === 0;
+            const innerR = isMain ? radius - 12 : radius - 8;
+            const outerR = radius - 4;
+
             ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.strokeStyle = '#bbb';
-            ctx.lineWidth = i % 3 === 0 ? 2 : 1;
+            ctx.moveTo(Math.cos(angle) * innerR, Math.sin(angle) * innerR);
+            ctx.lineTo(Math.cos(angle) * outerR, Math.sin(angle) * outerR);
+            ctx.strokeStyle = isMain ? '#8fa3b1' : '#c4d0d9';
+            ctx.lineWidth = isMain ? 2 : 1;
+            ctx.lineCap = 'round';
             ctx.stroke();
         }
- 
+
+        // 숫자 표시 제거됨 - 테마색 변수만 유지
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#7ec8c8';
+
         const hours = now.getHours() % 12;
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
- 
+
         // 시침
         const hourAngle = (hours + minutes / 60) * Math.PI / 6 - Math.PI / 2;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(hourAngle) * (radius - 28), Math.sin(hourAngle) * (radius - 28));
-        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--dark-theme-color').trim() || '#333';
+        ctx.lineTo(Math.cos(hourAngle) * (radius - 26), Math.sin(hourAngle) * (radius - 26));
+        ctx.strokeStyle = '#5a6e7f';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.stroke();
- 
+
         // 분침
         const minAngle = (minutes + seconds / 60) * Math.PI / 30 - Math.PI / 2;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(minAngle) * (radius - 16), Math.sin(minAngle) * (radius - 16));
-        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--dark-theme-color').trim() || '#333';
+        ctx.lineTo(Math.cos(minAngle) * (radius - 14), Math.sin(minAngle) * (radius - 14));
+        ctx.strokeStyle = '#5a6e7f';
         ctx.lineWidth = 2;
         ctx.stroke();
- 
-        // 초침
+
+        // 초침 - 테마색 사용
         const secAngle = seconds * Math.PI / 30 - Math.PI / 2;
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(secAngle) * (radius - 12), Math.sin(secAngle) * (radius - 12));
-        ctx.strokeStyle = '#e8bcbc';
-        ctx.lineWidth = 1;
+        ctx.moveTo(Math.cos(secAngle + Math.PI) * 6, Math.sin(secAngle + Math.PI) * 6);
+        ctx.lineTo(Math.cos(secAngle) * (radius - 10), Math.sin(secAngle) * (radius - 10));
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
- 
-        // 중심점
+
+        // 중심점 - 바늘 굵기와 맞춤
         ctx.beginPath();
-        ctx.arc(0, 0, 3, 0, 2 * Math.PI);
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--dark-theme-color').trim() || '#333';
+        ctx.arc(0, 0, 2, 0, 2 * Math.PI);
+        ctx.fillStyle = accentColor;
         ctx.fill();
- 
+
         ctx.restore();
     }
- 
+
     function setClockType(type) {
         clockType = type;
         if (type === 'digital') {
@@ -294,12 +473,13 @@
             drawAnalogClock(new Date());
         }
     }
- 
+
     function openLink() {
         if (linkUrl) {
             window.open(linkUrl, '_blank');
         }
     }
+
     setInterval(updateClock, 1000); updateClock();
 
     function showSearch() {
@@ -317,8 +497,10 @@
         document.body.classList.add('is-embed');
         const c = params.get('c');
         if(c) updateTheme('#'+c);
+
         const ct = params.get('ct');
         if (ct) setClockType(ct);
+
         const l = params.get('l');
         if (l) {
             linkUrl = atob(l);
@@ -328,30 +510,34 @@
         const pal = document.getElementById('palette');
         themes.forEach(t => {
             const d = document.createElement('div');
-            d.className = 'color-dot' + (t==='ffffff'?' active':'');
+            d.className = 'color-dot' + (t==='7ec8c8'?' active':'');
             d.style.background = '#' + t;
             d.onclick = () => {
                 document.querySelectorAll('.color-dot').forEach(el => el.classList.remove('active'));
                 d.classList.add('active');
-                updateTheme('#'+t);
+                updateAccentColor('#'+t);
             };
             pal.appendChild(d);
         });
     }
 
-    function updateTheme(hex) {
+    function updateAccentColor(hex) {
         selectedColor = hex.replace('#', '');
-        document.documentElement.style.setProperty('--theme-color', hex);
-        const r = parseInt(selectedColor.slice(0,2), 16), g = parseInt(selectedColor.slice(2,4), 16), b = parseInt(selectedColor.slice(4,6), 16);
-        const darkR = Math.max(0, r - 100), darkG = Math.max(0, g - 100), darkB = Math.max(0, b - 100);
-        document.documentElement.style.setProperty('--dark-theme-color', `rgb(${darkR},${darkG},${darkB})`);
-        document.documentElement.style.setProperty('--hover-color', `rgba(${r},${g},${b},0.12)`);
+        document.documentElement.style.setProperty('--accent-color', hex);
+        // 아날로그 시계 색상도 업데이트
+        if (clockType === 'analog') {
+            drawAnalogClock(new Date());
+        }
+    }
+
+    function updateTheme(hex) {
+        updateAccentColor(hex);
     }
 
     async function moveStep(n) {
         if (n === 1 && step === 1) {
             const tk = document.getElementById('tokenInput').value;
-            const res = await fetch(`${SERVER_URL}/api/notion/databases`, { 
+            const res = await fetch(`${SERVER_URL}/api/notion/databases`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ token: tk })
             });
             const dbs = await res.json();
@@ -366,7 +552,7 @@
             const l = linkVal ? btoa(linkVal) : '';
             let url = `${window.location.origin}${window.location.pathname}?t=${t}&d=${d}&k=${k}&c=${selectedColor}&ct=${ct}`;
             if (l) url += `&l=${l}`;
-            navigator.clipboard.writeText(url); alert("위젯 생성 성공! 노션에 붙여넣으세요. 🤍"); return;
+            navigator.clipboard.writeText(url); alert("위젯 생성 성공! 노션에 붙여넣으세요."); return;
         }
         document.getElementById(`step${step}`).classList.remove('active');
         step += n;
@@ -374,56 +560,34 @@
         document.getElementById('prevBtn').disabled = (step === 1);
     }
 
-    let searchResults = [];
-
     async function performSearch() {
         const query = document.getElementById('searchInput').value;
-        try {
-            const res = await fetch(`${SERVER_URL}/api/search?k=${atob(params.get('k'))}&q=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error("Server error");
-            const books = await res.json();
-            searchResults = books;
-            document.getElementById('resultList').innerHTML = books.map((b, index) => `
-                <div class="book-card" onclick="saveBookByIndex(${index})">
-                    <img src="${b.cover}" class="book-cover" onerror="this.src='https://via.placeholder.com/150x200?text=No+Image'">
-                    <div class="book-info"><div class="b-title">${b.title}</div><div class="b-author">${b.author || '저자 미상'}</div></div>
-                </div>
-            `).join('');
-        } catch (e) {
-            console.error(e);
-            document.getElementById('resultList').innerHTML = '<div style="padding:10px;text-align:center;color:#999;font-size:11px;">검색 중 오류가 발생했거나 결과가 없습니다.<br>다시 시도해주세요.</div>';
-        }
+        const res = await fetch(`${SERVER_URL}/api/search?k=${atob(params.get('k'))}&q=${encodeURIComponent(query)}`);
+        const books = await res.json();
+        document.getElementById('resultList').innerHTML = books.map(b => {
+            const safeData = encodeURIComponent(JSON.stringify(b));
+            return `
+            <div class="book-card" onclick="saveToNotion('${safeData}')">
+                <img src="${b.cover}" class="book-cover" onerror="this.src='https://via.placeholder.com/150x200?text=No+Image'">
+                <div class="book-info"><div class="b-title">${b.title}</div><div class="b-author">${b.author}</div></div>
+            </div>
+        `}).join('');
     }
 
-    async function saveBookByIndex(index) {
-        // 객체의 깊은 복사를 통해 원본 데이터를 훼손하지 않고 수정하네
-        const originalBook = searchResults[index];
-        if (!originalBook) return;
-        
-        const cleanBook = JSON.parse(JSON.stringify(originalBook));
-
-        // description 필드가 있다면 HTML 태그와 엔티티를 정제하네
-        if (cleanBook.description) {
-            // 1. HTML 태그 제거
-            let text = cleanBook.description.replace(/<[^>]*>?/gm, ' ');
-            // 2. HTML 엔티티(&lt;, &amp; 등)를 일반 문자로 변환
-            const tempDiv = document.createElement("textarea");
-            tempDiv.innerHTML = text;
-            cleanBook.description = tempDiv.value;
-        }
-
+    async function saveToNotion(encodedData) {
+        const book = JSON.parse(decodeURIComponent(encodedData));
         const res = await fetch(`${SERVER_URL}/api/notion/save`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                token: atob(params.get('t')), 
-                db: atob(params.get('d')), 
-                ...cleanBook 
+            body: JSON.stringify({
+                token: atob(params.get('t')),
+                db: atob(params.get('d')),
+                ...book
             })
         });
         const data = await res.json();
         if(data.success) {
             const t = document.getElementById('toast');
-            t.classList.add('show'); 
+            t.classList.add('show');
             setTimeout(() => { t.classList.remove('show'); goHome(); }, 2000);
         } else {
             alert("저장 실패: " + data.error);
