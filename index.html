@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg-color: #e8ecef;
-            --page-bg: #e8ecef;
+            --page-bg: #ffffff;
             --theme-color: #e8ecef;
             --accent-color: #7ec8c8;
             --accent-rgb: 126, 200, 200;
@@ -596,7 +596,8 @@
             searchResults = books.filter(b => b && b.title).map(b => ({
                 ...b,
                 title: stripHtml(b.title),
-                author: stripHtml(b.author) || '저자 미상'
+                author: stripHtml(b.author) || '저자 미상',
+                description: stripHtml(b.description)
             }));
 
             document.getElementById('resultList').innerHTML = searchResults.map((b, index) => `
