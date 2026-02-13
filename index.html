@@ -122,9 +122,33 @@
             overflow: hidden; display: flex; flex-direction: column;
             border: none; margin: 0 auto;
             position: relative;
+            transition: background 0.3s, box-shadow 0.3s;
         }
         body.is-embed .widget-frame { width: 260px !important; height: 185px !important; }
         body.is-embed { background: var(--page-bg); }
+
+        /* 배경색 프리셋 */
+        .bg-preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .bg-preset {
+            padding: 6px 12px; border-radius: 10px; border: none;
+            background: var(--bg-color); font-size: 11px; font-weight: 600;
+            color: var(--text-secondary); cursor: pointer;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            transition: all 0.2s;
+        }
+        .bg-preset:active, .bg-preset.active {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+        }
+        .bg-custom-row { display: none; margin-bottom: 12px; }
+        .bg-custom-row input[type="color"] {
+            width: 100%; height: 36px; border-radius: 12px; border: none; cursor: pointer;
+            background: var(--bg-color); padding: 3px;
+            box-shadow: inset 2px 2px 5px rgba(163,177,198,0.4), inset -2px -2px 5px rgba(255,255,255,0.5);
+            -webkit-appearance: none; appearance: none;
+        }
+        .bg-custom-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+        .bg-custom-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 9px; }
+        .label-text { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
 
         .widget-top {
             height: 36px; background: var(--bg-color);
@@ -219,7 +243,7 @@
             filter: brightness(0.9);
         }
         .search-trigger:active {
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light) !important;
         }
         .link-btn { margin-top: 0 !important; }
 
@@ -270,7 +294,7 @@
             transition: all 0.2s ease;
         }
         .icon-btn:active {
-            box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light);
+            box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light) !important;
         }
 
         #toast {
@@ -326,9 +350,20 @@
                     <option value="analog">아날로그 시계</option>
                 </select>
                 <input type="url" id="linkInput" placeholder="바로가기 링크 URL (선택사항)">
+                <span class="label-text" style="margin-top:8px;">Accent Color</span>
                 <div class="color-palette" id="palette"></div>
                 <input type="color" id="cp" style="visibility:hidden;width:0;height:0;padding:0;margin:0;" oninput="updateTheme(this.value)">
                 <button class="search-trigger" style="width:100%;margin-top:8px;" onclick="document.getElementById('cp').click()">Custom Color</button>
+                <span class="label-text" style="margin-top:16px;">Widget Background</span>
+                <div class="bg-preset-row">
+                    <button class="bg-preset active" onclick="applyWidgetBg('default')">Default</button>
+                    <button class="bg-preset" onclick="applyWidgetBg('notion-light')">Light</button>
+                    <button class="bg-preset" onclick="applyWidgetBg('notion-dark')">Dark</button>
+                    <button class="bg-preset" onclick="applyWidgetBg('custom')">Custom</button>
+                </div>
+                <div class="bg-custom-row" id="bgCustomRow">
+                    <input type="color" id="bgCustomColor" value="#e8ecef" oninput="applyWidgetBg('custom')">
+                </div>
             </div>
         </div>
     </div>
@@ -376,6 +411,150 @@
 
     let clockType = 'digital';
     let linkUrl = '';
+    let widgetBgMode = 'default';
+    let widgetBgHex = '#e8ecef';
+
+    function getContrastYIQ(hex) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+        return ((r*299 + g*587 + b*114) / 1000 >= 128) ? '#3a4556' : '#f0f0f0';
+    }
+
+    function getSecondaryFromPrimary(primary) {
+        const hex = primary.replace('#', '');
+        const r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+        const isDark = ((r*299 + g*587 + b*114) / 1000) < 128;
+        if (isDark) {
+            return `rgb(${Math.min(255,r+60)}, ${Math.min(255,g+60)}, ${Math.min(255,b+60)})`;
+        }
+        return `rgb(${Math.max(0,r-40)}, ${Math.max(0,g-40)}, ${Math.max(0,b-40)})`;
+    }
+
+    function getNeuShadows(hex) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+        const dr = Math.round(r * 0.7), dg = Math.round(g * 0.7), db = Math.round(b * 0.7);
+        const lr = Math.min(255, Math.round(r + (255 - r) * 0.5));
+        const lg = Math.min(255, Math.round(g + (255 - g) * 0.5));
+        const lb = Math.min(255, Math.round(b + (255 - b) * 0.5));
+        return {
+            dark: `rgba(${dr},${dg},${db},0.6)`,
+            light: `rgba(${lr},${lg},${lb},0.8)`,
+            convex: `10px 10px 20px rgba(${dr},${dg},${db},0.6), -10px -10px 20px rgba(${lr},${lg},${lb},0.8)`,
+            concave: `inset 3px 3px 6px rgba(${dr},${dg},${db},0.5), inset -3px -3px 6px rgba(${lr},${lg},${lb},0.6)`,
+            btnConvex: `4px 4px 8px rgba(${dr},${dg},${db},0.6), -4px -4px 8px rgba(${lr},${lg},${lb},0.8)`,
+            btnActive: `inset 3px 3px 6px rgba(${dr},${dg},${db},0.5), inset -3px -3px 6px rgba(${lr},${lg},${lb},0.6)`,
+            dotShadow: `1px 1px 2px rgba(${dr},${dg},${db},0.5), -1px -1px 2px rgba(${lr},${lg},${lb},0.5)`,
+            clockConvex: `6px 6px 12px rgba(${dr},${dg},${db},0.6), -6px -6px 12px rgba(${lr},${lg},${lb},0.8)`,
+            searchInset: `inset 3px 3px 6px rgba(${dr},${dg},${db},0.5), inset -3px -3px 6px rgba(${lr},${lg},${lb},0.6)`,
+            iconConvex: `2px 2px 4px rgba(${dr},${dg},${db},0.6), -2px -2px 4px rgba(${lr},${lg},${lb},0.8)`,
+            iconActive: `inset 1px 1px 2px rgba(${dr},${dg},${db},0.5), inset -1px -1px 2px rgba(${lr},${lg},${lb},0.6)`,
+        };
+    }
+
+    function resolveWidgetBg(mode) {
+        switch(mode) {
+            case 'notion-light': return '#ffffff';
+            case 'notion-dark': return '#191919';
+            case 'custom': return document.getElementById('bgCustomColor') ? document.getElementById('bgCustomColor').value : '#e8ecef';
+            default: return '#e8ecef';
+        }
+    }
+
+    function applyWidgetBg(mode) {
+        widgetBgMode = mode;
+        document.getElementById('bgCustomRow').style.display = mode === 'custom' ? 'block' : 'none';
+        document.querySelectorAll('.bg-preset').forEach(b => b.classList.remove('active'));
+        const labels = {'default': 'Default', 'notion-light': 'Light', 'notion-dark': 'Dark', 'custom': 'Custom'};
+        document.querySelectorAll('.bg-preset').forEach(b => { if (b.textContent === labels[mode]) b.classList.add('active'); });
+
+        widgetBgHex = resolveWidgetBg(mode);
+        applyWidgetColors(widgetBgHex);
+    }
+
+    function applyWidgetColors(bgHex) {
+        const frame = document.querySelector('.widget-frame');
+        const neu = getNeuShadows(bgHex);
+        const textPrimary = getContrastYIQ(bgHex);
+        const textSecondary = getSecondaryFromPrimary(textPrimary);
+
+        // 위젯 프레임
+        frame.style.background = bgHex;
+        frame.style.boxShadow = neu.convex;
+
+        // 페이지 배경도 동기화
+        document.body.style.background = bgHex;
+        document.documentElement.style.setProperty('--page-bg', bgHex);
+
+        // 위젯 내부 요소들
+        const top = frame.querySelector('.widget-top');
+        if (top) {
+            top.style.background = bgHex;
+        }
+
+        // 제목 색
+        const wTitle = frame.querySelector('.w-title');
+        if (wTitle) wTitle.style.color = textPrimary;
+
+        // 시계 배경 + 그림자
+        const digitalClock = document.getElementById('digitalClock');
+        if (digitalClock) {
+            digitalClock.style.background = bgHex;
+            digitalClock.style.boxShadow = neu.clockConvex;
+        }
+        const clockFace = frame.querySelector('.clock-face');
+        if (clockFace) {
+            clockFace.style.background = bgHex;
+            clockFace.style.boxShadow = neu.clockConvex;
+        }
+
+        // 시계 날짜 텍스트
+        const dateEls = frame.querySelectorAll('#currentDate, #currentDateAnalog');
+        dateEls.forEach(el => el.style.color = textSecondary);
+
+        // 검색 버튼들
+        frame.querySelectorAll('.search-trigger').forEach(btn => {
+            btn.style.background = bgHex;
+            btn.style.boxShadow = neu.btnConvex;
+            btn.style.color = textPrimary;
+        });
+
+        // 검색 영역
+        const searchBox = frame.querySelector('.search-box');
+        if (searchBox) {
+            searchBox.style.background = bgHex;
+            searchBox.style.boxShadow = neu.searchInset;
+        }
+        const searchInput = frame.querySelector('#searchInput');
+        if (searchInput) searchInput.style.color = textPrimary;
+
+        // 아이콘 버튼
+        frame.querySelectorAll('.icon-btn').forEach(btn => {
+            btn.style.background = bgHex;
+            btn.style.boxShadow = neu.iconConvex;
+            btn.style.color = textSecondary;
+        });
+
+        // 도트
+        frame.querySelectorAll('.w-dot').forEach(dot => {
+            dot.style.boxShadow = neu.dotShadow;
+        });
+
+        // 북 리스트 배경
+        const bookList = document.getElementById('resultList');
+        if (bookList) bookList.style.background = bgHex;
+
+        // 책 카드 텍스트
+        frame.querySelectorAll('.b-title').forEach(el => el.style.color = textPrimary);
+        frame.querySelectorAll('.b-author').forEach(el => el.style.color = textSecondary);
+
+        // CSS 변수 업데이트 (위젯 영역)
+        frame.style.setProperty('--bg-color', bgHex);
+        frame.style.setProperty('--shadow-dark', neu.dark);
+        frame.style.setProperty('--shadow-light', neu.light);
+        frame.style.setProperty('--text-primary', textPrimary);
+        frame.style.setProperty('--text-secondary', textSecondary);
+    }
 
     // HTML 엔티티 및 태그 제거 함수
     function stripHtml(str) {
@@ -521,6 +700,16 @@
             linkUrl = atob(l);
             document.getElementById('linkBtn').style.display = 'inline-block';
         }
+
+        const wbg = params.get('wbg');
+        if (wbg) {
+            let bgHex;
+            if (wbg === 'notion-light') bgHex = '#ffffff';
+            else if (wbg === 'notion-dark') bgHex = '#191919';
+            else bgHex = '#' + wbg;
+            widgetBgHex = bgHex;
+            applyWidgetColors(bgHex);
+        }
     } else {
         const pal = document.getElementById('palette');
         themes.forEach(t => {
@@ -539,12 +728,18 @@
     function updateAccentColor(hex) {
         selectedColor = hex.replace('#', '');
         document.documentElement.style.setProperty('--accent-color', hex);
-        // RGB 변수도 업데이트 (hover 배경용)
         const r = parseInt(selectedColor.slice(0,2), 16);
         const g = parseInt(selectedColor.slice(2,4), 16);
         const b = parseInt(selectedColor.slice(4,6), 16);
         document.documentElement.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
-        // 아날로그 시계 색상도 업데이트
+        // 위젯 내 시계 시간 텍스트 - 액센트 색 유지
+        const timeEl = document.getElementById('currentTime');
+        if (timeEl) timeEl.style.color = hex;
+        // 위젯 내 버튼 텍스트 - 액센트 색 유지
+        const frame = document.querySelector('.widget-frame');
+        frame.querySelectorAll('.search-trigger').forEach(btn => btn.style.color = hex);
+        // 위젯 도트 - 액센트 색 유지
+        frame.querySelectorAll('.w-dot').forEach(dot => dot.style.background = hex);
         if (clockType === 'analog') {
             drawAnalogClock(new Date());
         }
@@ -570,8 +765,10 @@
             const ct = document.getElementById('clockType').value;
             const linkVal = document.getElementById('linkInput').value;
             const l = linkVal ? btoa(linkVal) : '';
+            const wbg = widgetBgMode !== 'default' ? (widgetBgMode === 'custom' ? widgetBgHex.replace('#','') : widgetBgMode) : '';
             let url = `${window.location.origin}${window.location.pathname}?t=${t}&d=${d}&k=${k}&c=${selectedColor}&ct=${ct}`;
             if (l) url += `&l=${l}`;
+            if (wbg) url += `&wbg=${wbg}`;
             navigator.clipboard.writeText(url); alert("위젯 생성 성공! 노션에 붙여넣으세요."); return;
         }
         document.getElementById(`step${step}`).classList.remove('active');
